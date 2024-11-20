@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Nearform.AspNetCore.SlowDown;
 
 namespace SlowDown.Tests;

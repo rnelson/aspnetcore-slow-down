@@ -1,7 +1,9 @@
-﻿using Nearform.AspNetCore.SlowDown;
+﻿using System.Diagnostics.CodeAnalysis;
+using Nearform.AspNetCore.SlowDown;
 
 namespace SlowDown.Tests;
 
+[SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
 public class SlowDownMiddlewareTests
 {
     private static readonly SemaphoreSlim Semaphore = new(1,1);

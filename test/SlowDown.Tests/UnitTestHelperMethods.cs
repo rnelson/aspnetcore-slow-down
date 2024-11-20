@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@ using Nearform.AspNetCore.SlowDown;
 
 namespace SlowDown.Tests;
 
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 internal static class UnitTestHelperMethods
 {
     public static DefaultHttpContext CreateHttpContext() => new();

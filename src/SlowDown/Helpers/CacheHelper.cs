@@ -19,7 +19,7 @@ internal static class CacheHelper
         var opt = SlowDownOptions.CurrentOptions;
         
         var count = await opt.Cache.GetOrCreateAsync(key, 
-            async cancel => await Task.FromResult(0),
+            async _ => await Task.FromResult(0),
             cancellationToken: ct);
 
         return count;

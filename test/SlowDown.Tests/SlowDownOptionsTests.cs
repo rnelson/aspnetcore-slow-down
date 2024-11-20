@@ -1,9 +1,11 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using Microsoft.AspNetCore.Http;
 using Nearform.AspNetCore.SlowDown;
 
 namespace SlowDown.Tests;
 
+[SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
 public class SlowDownOptionsTests
 {
     [Fact]
