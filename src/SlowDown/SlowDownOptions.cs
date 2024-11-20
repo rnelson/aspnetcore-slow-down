@@ -38,16 +38,6 @@ public sealed class SlowDownOptions
     /// counts are kept in memory. Set to <c>0</c> to disable delaying.
     /// </summary>
     public int TimeWindow { get; set; } = 30000;
-
-    // /// <summary>
-    // /// The maximum number of items that will be stored in the in-memory
-    // /// cache.
-    // /// </summary>
-    // /// <remarks>
-    // /// This middleware internally uses an LRU cache to handle the clients.
-    // /// You can change the size of the cache with this option.
-    // /// </remarks>
-    // public int InMemoryCacheSize = 5000;
     
     /// <summary>
     /// A <see cref="HybridCache"/> instance to use for caching clients and
