@@ -10,7 +10,7 @@ public class AspNetCoreHelperTests
     [Fact]
     public async Task GetClientIp_ReturnsEmptyWhenCancelled()
     {
-        var cancellationTokenSource = UnitTestHelperMethods.GetCancelledCancellationTokenSource();
+        var cancellationTokenSource = UnitTestHelperMethods.CreateCancelledCancellationTokenSource();
         var context = new DefaultHttpContext();
         
         var clientIp = await AspNetCoreHelper.GetClientIp(context.Request, cancellationTokenSource.Token);
@@ -23,7 +23,7 @@ public class AspNetCoreHelperTests
         const string expected = "4.2.2.4";
         var context = new DefaultHttpContext();
         var options = new SlowDownOptions();
-        var cancellationToken = UnitTestHelperMethods.GetCancellationToken();
+        var cancellationToken = UnitTestHelperMethods.CreateCancellationToken();
         
         context.Request.Headers["X-Forwarded-For"] = expected;
         var clientIp = await options.KeyGenerator(context.Request, cancellationToken);
@@ -37,7 +37,7 @@ public class AspNetCoreHelperTests
         const string expected = "4.2.2.4";
         var context = new DefaultHttpContext();
         var options = new SlowDownOptions();
-        var cancellationToken = UnitTestHelperMethods.GetCancellationToken();
+        var cancellationToken = UnitTestHelperMethods.CreateCancellationToken();
         
         context.Request.Headers["REMOTE_ADDR"] = expected;
         var clientIp = await options.KeyGenerator(context.Request, cancellationToken);
@@ -51,7 +51,7 @@ public class AspNetCoreHelperTests
         const string expected = "4.2.2.4";
         var context = new DefaultHttpContext();
         var options = new SlowDownOptions();
-        var cancellationToken = UnitTestHelperMethods.GetCancellationToken();
+        var cancellationToken = UnitTestHelperMethods.CreateCancellationToken();
         
         context.Connection.RemoteIpAddress = IPAddress.Parse(expected);
         var clientIp = await options.KeyGenerator(context.Request, cancellationToken);

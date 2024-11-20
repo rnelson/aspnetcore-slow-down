@@ -142,7 +142,7 @@ public class SlowDownOptionsTests
         
         context.Request.Headers["X-Forwarded-For"] = expected;
         var key = await options.KeyGenerator(context.Request,
-            UnitTestHelperMethods.GetFutureCancellationToken(options));
+            UnitTestHelperMethods.CreateFutureCancellationToken(options));
         
         Assert.Equal(expected, key);
     }
@@ -156,7 +156,7 @@ public class SlowDownOptionsTests
         
         context.Request.Headers["REMOTE_ADDR"] = expected;
         var key = await options.KeyGenerator(context.Request,
-            UnitTestHelperMethods.GetFutureCancellationToken(options));
+            UnitTestHelperMethods.CreateFutureCancellationToken(options));
         
         Assert.Equal(expected, key);
     }
@@ -170,7 +170,7 @@ public class SlowDownOptionsTests
         
         context.Connection.RemoteIpAddress = IPAddress.Parse(expected);
         var key = await options.KeyGenerator(context.Request,
-            UnitTestHelperMethods.GetFutureCancellationToken(options));
+            UnitTestHelperMethods.CreateFutureCancellationToken(options));
         
         Assert.Equal(expected, key);
     }
@@ -181,7 +181,7 @@ public class SlowDownOptionsTests
     public async Task Test_HelperMethod_CreateKeyGenerator(string expected)
     {
         var request = UnitTestHelperMethods.CreateHttpContext().Request;
-        var cancellationToken = UnitTestHelperMethods.GetCancellationToken();
+        var cancellationToken = UnitTestHelperMethods.CreateCancellationToken();
         
         var generator = UnitTestHelperMethods.CreateKeyGenerator(expected);
         var actual = await generator.Invoke(request, cancellationToken);
