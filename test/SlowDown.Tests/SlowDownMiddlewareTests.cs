@@ -4,7 +4,7 @@ namespace SlowDown.Tests;
 
 public class SlowDownMiddlewareTests
 {
-    private static SemaphoreSlim semaphore = new SemaphoreSlim(1,1);
+    private static readonly SemaphoreSlim Semaphore = new(1,1);
     
     [Fact]
     public void Constructor_Works()
@@ -33,7 +33,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_AddedCorrectHeadersBeforeLimit()
     {
-        await semaphore.WaitAsync();
+        await Semaphore.WaitAsync();
 
         try
         {
@@ -63,14 +63,14 @@ public class SlowDownMiddlewareTests
         }
         finally
         {
-            semaphore.Release();
+            Semaphore.Release();
         }
     }
 
     [Fact]
     public async Task HandleSlowDown_AddedCorrectHeadersAfterLimit()
     {
-        await semaphore.WaitAsync();
+        await Semaphore.WaitAsync();
         
         try
         {
@@ -100,14 +100,14 @@ public class SlowDownMiddlewareTests
         }
         finally
         {
-            semaphore.Release();
+            Semaphore.Release();
         }
     }
 
     [Fact]
     public async Task HandleSlowDown_RemainingIsZeroWithNoWindow()
     {
-        await semaphore.WaitAsync();
+        await Semaphore.WaitAsync();
         
         try
         {
@@ -138,7 +138,7 @@ public class SlowDownMiddlewareTests
         }
         finally
         {
-            semaphore.Release();
+            Semaphore.Release();
         }
     }
 }
