@@ -16,16 +16,16 @@ public class AspNetCoreHelperTests
         var clientIp = await AspNetCoreHelper.GetClientIp(context.Request, cancellationTokenSource.Token);
         Assert.Equal(string.Empty, clientIp);
     }
-    
+
     [Fact]
-    public async Task GetClientIp_ReturnsValueFromXForwardedForHeader()
+    public async Task GetClientIp_ReturnsValueFromContextConnectionRemoteIpAddress()
     {
         const string expected = "4.2.2.4";
         var context = new DefaultHttpContext();
         var options = new SlowDownOptions();
         var cancellationToken = UnitTestHelperMethods.CreateCancellationToken();
         
-        context.Request.Headers["X-Forwarded-For"] = expected;
+        context.Connection.RemoteIpAddress = IPAddress.Parse(expected);
         var clientIp = await options.KeyGenerator(context.Request, cancellationToken);
         
         Assert.Equal(expected, clientIp);
@@ -44,16 +44,16 @@ public class AspNetCoreHelperTests
         
         Assert.Equal(expected, clientIp);
     }
-
+    
     [Fact]
-    public async Task GetClientIp_ReturnsValueFromContextConnectionRemoteIpAddress()
+    public async Task GetClientIp_ReturnsValueFromXForwardedForHeader()
     {
         const string expected = "4.2.2.4";
         var context = new DefaultHttpContext();
         var options = new SlowDownOptions();
         var cancellationToken = UnitTestHelperMethods.CreateCancellationToken();
         
-        context.Connection.RemoteIpAddress = IPAddress.Parse(expected);
+        context.Request.Headers["X-Forwarded-For"] = expected;
         var clientIp = await options.KeyGenerator(context.Request, cancellationToken);
         
         Assert.Equal(expected, clientIp);

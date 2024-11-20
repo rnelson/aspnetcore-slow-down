@@ -9,12 +9,6 @@ namespace SlowDown.Tests;
 public class SlowDownOptionsTests
 {
     [Fact]
-    public void Constructor_Works()
-    {
-        _ = new SlowDownOptions();
-    }
-    
-    [Fact]
     public void Constructor_HasExpectedDefaults()
     {
         var options = new SlowDownOptions();
@@ -32,6 +26,89 @@ public class SlowDownOptionsTests
         Assert.False(options.SkipSuccessfulRequests);
         Assert.Null(options.Skip);
         Assert.Equal(1000, options.CacheTimeout);
+    }
+    
+    [Fact]
+    public void Constructor_Works()
+    {
+        _ = new SlowDownOptions();
+    }
+
+    [Fact]
+    public async Task DefaultKeyGenerator_GetsClientIpWithContextConnectionRemoteIpAddress()
+    {
+        const string expected = "4.2.2.4";
+        var context = new DefaultHttpContext();
+        var options = new SlowDownOptions();
+        
+        context.Connection.RemoteIpAddress = IPAddress.Parse(expected);
+        var key = await options.KeyGenerator(context.Request,
+            UnitTestHelperMethods.CreateFutureCancellationToken(options));
+        
+        Assert.Equal(expected, key);
+    }
+
+    [Fact]
+    public async Task DefaultKeyGenerator_GetsClientIpWithRemoteAddrHeader()
+    {
+        const string expected = "4.2.2.4";
+        var context = new DefaultHttpContext();
+        var options = new SlowDownOptions();
+        
+        context.Request.Headers["REMOTE_ADDR"] = expected;
+        var key = await options.KeyGenerator(context.Request,
+            UnitTestHelperMethods.CreateFutureCancellationToken(options));
+        
+        Assert.Equal(expected, key);
+    }
+
+    [Fact]
+    public async Task DefaultKeyGenerator_GetsClientIpWithXForwardedForHeader()
+    {
+        const string expected = "4.2.2.4";
+        var context = new DefaultHttpContext();
+        var options = new SlowDownOptions();
+        
+        context.Request.Headers["X-Forwarded-For"] = expected;
+        var key = await options.KeyGenerator(context.Request,
+            UnitTestHelperMethods.CreateFutureCancellationToken(options));
+        
+        Assert.Equal(expected, key);
+    }
+
+    [Fact]
+    public void Properties_CurrentOptions_Works()
+    {
+        const int initial = 5;
+        const int expected = 42;
+
+        SlowDownOptions.CurrentOptions = new();
+        Assert.Equal(initial, SlowDownOptions.CurrentOptions.DelayAfter);
+        
+        var newOptions = new SlowDownOptions { DelayAfter = expected };
+        SlowDownOptions.CurrentOptions = newOptions;
+        
+        Assert.Equal(expected, SlowDownOptions.CurrentOptions.DelayAfter);
+    }
+
+    [Fact]
+    public void Properties_KeyGenerator_Works()
+    {
+        var options = new SlowDownOptions();
+        var keyGenerator1 = UnitTestHelperMethods.CreateKeyGenerator("Hello");
+        var keyGenerator2 = UnitTestHelperMethods.CreateKeyGenerator("World");
+        
+        Assert.NotSame(keyGenerator1, keyGenerator2);
+        Assert.NotSame(keyGenerator1, options.KeyGenerator);
+        Assert.NotSame(keyGenerator2, options.KeyGenerator);
+        
+        options.KeyGenerator = keyGenerator1;
+        Assert.Same(keyGenerator1, options.KeyGenerator);
+        Assert.NotSame(keyGenerator2, options.KeyGenerator);
+        
+        options.KeyGenerator = keyGenerator2;
+        Assert.NotSame(keyGenerator1, options.KeyGenerator);
+        Assert.Same(keyGenerator2, options.KeyGenerator);
     }
     
     [Fact]
@@ -96,83 +173,6 @@ public class SlowDownOptionsTests
         Assert.False(options.SkipSuccessfulRequests);
         Assert.Null(options.Skip);
         Assert.Equal(2, options.CacheTimeout);
-    }
-
-    [Fact]
-    public void Properties_CurrentOptions_Works()
-    {
-        const int initial = 5;
-        const int expected = 42;
-
-        SlowDownOptions.CurrentOptions = new();
-        Assert.Equal(initial, SlowDownOptions.CurrentOptions.DelayAfter);
-        
-        var newOptions = new SlowDownOptions { DelayAfter = expected };
-        SlowDownOptions.CurrentOptions = newOptions;
-        
-        Assert.Equal(expected, SlowDownOptions.CurrentOptions.DelayAfter);
-    }
-
-    [Fact]
-    public void Properties_KeyGenerator_Works()
-    {
-        var options = new SlowDownOptions();
-        var keyGenerator1 = UnitTestHelperMethods.CreateKeyGenerator("Hello");
-        var keyGenerator2 = UnitTestHelperMethods.CreateKeyGenerator("World");
-        
-        Assert.NotSame(keyGenerator1, keyGenerator2);
-        Assert.NotSame(keyGenerator1, options.KeyGenerator);
-        Assert.NotSame(keyGenerator2, options.KeyGenerator);
-        
-        options.KeyGenerator = keyGenerator1;
-        Assert.Same(keyGenerator1, options.KeyGenerator);
-        Assert.NotSame(keyGenerator2, options.KeyGenerator);
-        
-        options.KeyGenerator = keyGenerator2;
-        Assert.NotSame(keyGenerator1, options.KeyGenerator);
-        Assert.Same(keyGenerator2, options.KeyGenerator);
-    }
-
-    [Fact]
-    public async Task DefaultKeyGenerator_GetsClientIpWithXForwardedForHeader()
-    {
-        const string expected = "4.2.2.4";
-        var context = new DefaultHttpContext();
-        var options = new SlowDownOptions();
-        
-        context.Request.Headers["X-Forwarded-For"] = expected;
-        var key = await options.KeyGenerator(context.Request,
-            UnitTestHelperMethods.CreateFutureCancellationToken(options));
-        
-        Assert.Equal(expected, key);
-    }
-
-    [Fact]
-    public async Task DefaultKeyGenerator_GetsClientIpWithRemoteAddrHeader()
-    {
-        const string expected = "4.2.2.4";
-        var context = new DefaultHttpContext();
-        var options = new SlowDownOptions();
-        
-        context.Request.Headers["REMOTE_ADDR"] = expected;
-        var key = await options.KeyGenerator(context.Request,
-            UnitTestHelperMethods.CreateFutureCancellationToken(options));
-        
-        Assert.Equal(expected, key);
-    }
-
-    [Fact]
-    public async Task DefaultKeyGenerator_GetsClientIpWithContextConnectionRemoteIpAddress()
-    {
-        const string expected = "4.2.2.4";
-        var context = new DefaultHttpContext();
-        var options = new SlowDownOptions();
-        
-        context.Connection.RemoteIpAddress = IPAddress.Parse(expected);
-        var key = await options.KeyGenerator(context.Request,
-            UnitTestHelperMethods.CreateFutureCancellationToken(options));
-        
-        Assert.Equal(expected, key);
     }
 
     [Theory]
