@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <LangVersion>default</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <NoWarn>$(NoWarn);NU5104</NoWarn> <!-- NU5104 complains about preview builds here is no stable build of HybridCache yet -->
+        <GenerateSBOM>true</GenerateSBOM>
+        <Authors>Ross Nelson</Authors>
+        <Company>Nearform</Company>
+        <Copyright>Copyright (C) 2024 Nearform</Copyright>
+        <Description>Middleware to delay requests from a client rather than completely rejecting it.</Description>
+        <PackageReleaseNotes>Initial build.</PackageReleaseNotes>
+        <!--
+        <PackageProjectUrl>https://github.com/rnelson/Libexec.AspnetCore.EnvironmentHeaders</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/rnelson/Libexec.AspnetCore.EnvironmentHeaders</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        -->
+        <PackageVersion>0.0.1</PackageVersion>
+        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <FileVersion>0.0.1</FileVersion>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>SlowDown.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.0.0-preview.9.24556.5" />
+      <PackageReference Include="Microsoft.Sbom.Targets" Version="3.0.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
+</Project>
