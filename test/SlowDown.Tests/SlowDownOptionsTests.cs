@@ -117,12 +117,8 @@ public class SlowDownOptionsTests
     public void Properties_KeyGenerator_Works()
     {
         var options = new SlowDownOptions();
-        var keyGenerator1 =
-            (HttpRequest request, CancellationToken cancellationToken) =>
-                Task.FromResult("Hello");
-        var keyGenerator2 =
-            (HttpRequest request, CancellationToken cancellationToken) =>
-                Task.FromResult("World");
+        var keyGenerator1 = UnitTestHelperMethods.CreateKeyGenerator("Hello");
+        var keyGenerator2 = UnitTestHelperMethods.CreateKeyGenerator("World");
         
         Assert.NotSame(keyGenerator1, keyGenerator2);
         Assert.NotSame(keyGenerator1, options.KeyGenerator);
@@ -177,5 +173,19 @@ public class SlowDownOptionsTests
             UnitTestHelperMethods.GetFutureCancellationToken(options));
         
         Assert.Equal(expected, key);
+    }
+
+    [Theory]
+    [InlineData("Hola")]
+    [InlineData("el mundo")]
+    public async Task Test_HelperMethod_CreateKeyGenerator(string expected)
+    {
+        var request = UnitTestHelperMethods.CreateHttpContext().Request;
+        var cancellationToken = UnitTestHelperMethods.GetCancellationToken();
+        
+        var generator = UnitTestHelperMethods.CreateKeyGenerator(expected);
+        var actual = await generator.Invoke(request, cancellationToken);
+        
+        Assert.Equal(expected, actual);
     }
 }

@@ -82,4 +82,10 @@ internal static class UnitTestHelperMethods
             .GetService<HybridCache>();
         return cache!;
     }
+
+    public static Func<HttpRequest, CancellationToken, Task<string>> CreateKeyGenerator(string response)
+    {
+        return (HttpRequest request, CancellationToken cancellationToken) =>
+            Task.FromResult(response);
+    }
 }
