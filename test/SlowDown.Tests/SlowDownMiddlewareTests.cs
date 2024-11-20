@@ -103,4 +103,42 @@ public class SlowDownMiddlewareTests
             semaphore.Release();
         }
     }
+
+    [Fact]
+    public async Task HandleSlowDown_RemainingIsZeroWithNoWindow()
+    {
+        await semaphore.WaitAsync();
+        
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                AddHeaders = true,
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 1,
+                TimeWindow = 0
+            };
+
+            // Set the current number of requests to 10. Calling InvokeAsync()
+            // will increment the count to 11 before doing any math.
+            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 300);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            await middleware.InvokeAsync(context);
+
+            Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.RemainingHeader));
+
+            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
+            Assert.Equal(1, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
+            Assert.Equal(-300, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
 }
