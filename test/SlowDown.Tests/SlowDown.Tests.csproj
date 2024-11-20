@@ -5,6 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <Version>0.0.1</Version>
+    <Authors>Ross Nelson</Authors>
+    <Company>Nearform</Company>
+    <Copyright>Copyright (C) 2024 Nearform Ltd.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

@@ -11,7 +11,7 @@
         <GenerateSBOM>true</GenerateSBOM>
         <Authors>Ross Nelson</Authors>
         <Company>Nearform</Company>
-        <Copyright>Copyright (C) 2024 Nearform</Copyright>
+        <Copyright>Copyright (C) 2024 Nearform Ltd.</Copyright>
         <Description>Middleware to delay requests from a client rather than completely rejecting it.</Description>
         <PackageReleaseNotes>Initial build.</PackageReleaseNotes>
         <!--
