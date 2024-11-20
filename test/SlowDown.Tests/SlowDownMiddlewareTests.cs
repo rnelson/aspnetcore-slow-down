@@ -89,6 +89,39 @@ public class SlowDownMiddlewareTests
     }
 
     [Fact]
+    public async Task HandleSlowDown_ExcludesHeadersWhenDisabled()
+    {
+        await Semaphore.WaitAsync();
+        
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                AddHeaders = false,
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 500
+            };
+
+            // Set the current number of requests to 10. Calling InvokeAsync()
+            // will increment the count to 11 before doing any math.
+            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 84);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            await middleware.InvokeAsync(context);
+
+            Assert.False(context.Response.Headers.ContainsKey(Constants.DelayHeader));
+            Assert.False(context.Response.Headers.ContainsKey(Constants.LimitHeader));
+            Assert.False(context.Response.Headers.ContainsKey(Constants.RemainingHeader));
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    [Fact]
     public async Task HandleSlowDown_RemainingIsZeroWithNoWindow()
     {
         await Semaphore.WaitAsync();
