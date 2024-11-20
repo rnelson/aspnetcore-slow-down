@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Nearform.AspNetCore.SlowDown;
 
+[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static class SlowDownMiddlewareExtensions
 {
     /// <summary>

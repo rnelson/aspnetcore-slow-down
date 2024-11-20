@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Hybrid;
 using Nearform.AspNetCore.SlowDown.Helpers;
 
 namespace Nearform.AspNetCore.SlowDown;
 
+[SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
 public sealed class SlowDownOptions
 {
     /// <summary>
@@ -69,7 +71,7 @@ public sealed class SlowDownOptions
     /// Function that gets called the first time the limit is reached within
     /// <see cref="TimeWindow"/>.
     /// </summary>
-    public Action<HttpRequest>? OnLimitReached { get; set; } = null;
+    public Action<HttpRequest>? OnLimitReached { get; set; }
 
     /// <summary>
     /// When <c>true</c>, failed requests (status &gt;= 400) won't be counted.
@@ -79,7 +81,7 @@ public sealed class SlowDownOptions
     /// runs. Any middleware or controllers that run after this may mark the request
     /// as having failed, but it will still count towards client requests here. 
     /// </remarks>
-    public bool SkipFailedRequests { get; set; } = false;
+    public bool SkipFailedRequests { get; set; }
 
     /// <summary>
     /// When <c>true</c>, failed requests (status &lt; 400) won't be counted.
@@ -89,13 +91,13 @@ public sealed class SlowDownOptions
     /// runs. Any middleware or controllers that run after this may mark the request
     /// as having failed, but it will still count towards client requests here. 
     /// </remarks>
-    public bool SkipSuccessfulRequests { get; set; } = false;
+    public bool SkipSuccessfulRequests { get; set; }
 
     /// <summary>
     /// Function used to skip requests. Returning <c>true</c> from the function will
     /// skip limiting for that request.
     /// </summary>
-    public Func<HttpRequest, bool>? Skip { get; set; } = null;
+    public Func<HttpRequest, bool>? Skip { get; set; }
     
     /// <summary>
     /// Time limit, in ms, for the cache lookup to run. If the time limit is exceeded,
