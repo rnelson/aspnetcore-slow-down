@@ -49,6 +49,14 @@ internal static class UnitTestHelperMethods
         return new Tuple<HybridCache, HttpRequest>(cache, request);
     }
     
+    public static HttpContext CreateXForwardedForHttpContext()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers["X-Forwarded-For"] = "127.0.0.1";
+        
+        return context;
+    }
+    
     private static HttpRequest CreateXForwardedForHttpRequest()
     {
         const string expected = "4.2.2.4";

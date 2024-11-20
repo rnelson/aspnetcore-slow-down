@@ -1,7 +1,11 @@
-﻿namespace SlowDown.Tests;
+﻿using Nearform.AspNetCore.SlowDown;
+
+namespace SlowDown.Tests;
 
 public class SlowDownMiddlewareTests
 {
+    private static SemaphoreSlim semaphore = new SemaphoreSlim(1,1);
+    
     [Fact]
     public void Constructor_Works()
     {
@@ -24,5 +28,79 @@ public class SlowDownMiddlewareTests
         var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
 
         await middleware.InvokeAsync(context);
+    }
+
+    [Fact]
+    public async Task HandleSlowDown_AddedCorrectHeadersBeforeLimit()
+    {
+        await semaphore.WaitAsync();
+
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                AddHeaders = true,
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 50
+            };
+
+            // Set the current number of requests to 10. Calling InvokeAsync()
+            // will increment the count to 11 before doing any math.
+            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 10);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            await middleware.InvokeAsync(context);
+
+            Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.RemainingHeader));
+
+            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
+            Assert.Equal(50, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
+            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
+    [Fact]
+    public async Task HandleSlowDown_AddedCorrectHeadersAfterLimit()
+    {
+        await semaphore.WaitAsync();
+        
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                AddHeaders = true,
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 10
+            };
+
+            // Set the current number of requests to 10. Calling InvokeAsync()
+            // will increment the count to 11 before doing any math.
+            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 10);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            await middleware.InvokeAsync(context);
+
+            Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.RemainingHeader));
+
+            Assert.Equal(1000, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
+            Assert.Equal(10, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
+            Assert.Equal(-1, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
+        }
+        finally
+        {
+            semaphore.Release();
+        }
     }
 }
