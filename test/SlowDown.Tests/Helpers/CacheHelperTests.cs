@@ -9,7 +9,7 @@ public class CacheHelperTests
     {
         var (_, request) = UnitTestHelperMethods.Setup();
         
-        var count = await CacheHelper.Get(request);
+        var (count, _) = await CacheHelper.Get(request);
         Assert.Equal(0, count);
     }
     
@@ -19,11 +19,11 @@ public class CacheHelperTests
         const int expected = 8;
         var (_, request) = UnitTestHelperMethods.Setup();
         
-        var count = await CacheHelper.Get(request);
+        var (count, _) = await CacheHelper.Get(request);
         Assert.Equal(0, count);
         
         await CacheHelper.Set(request, expected);
-        count = await CacheHelper.Get(request);
+        (count, _) = await CacheHelper.Get(request);
         Assert.Equal(expected, count);
     }
     
@@ -33,11 +33,13 @@ public class CacheHelperTests
         const int expected = 5;
         var (_, request) = UnitTestHelperMethods.Setup();
         
-        var count = await CacheHelper.Get(request);
+        var (count, _) = await CacheHelper.Get(request);
         Assert.Equal(0, count);
         
         await CacheHelper.Set(request, expected);
-        count = await CacheHelper.Get(request);
+        (count, _) = await CacheHelper.Get(request);
         Assert.Equal(expected, count);
     }
+    
+    // TODO: test cache expiration
 }

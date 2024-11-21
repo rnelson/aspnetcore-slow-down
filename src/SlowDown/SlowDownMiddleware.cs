@@ -27,15 +27,16 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
     {
         var opt = SlowDownOptions.CurrentOptions;
         var ip = await AspNetCoreHelper.GetClientIp(context.Request);
-        var newCount = await IncrementCount(ip);
+        var (newCount, _) = await IncrementCount(ip);
 
         var delay = CalculateDelay(newCount);
-        var remaining = Math.Min(opt.DelayAfter - newCount, 0);
+        var remaining = Math.Max(opt.DelayAfter - newCount, 0);
         
         if (opt.AddHeaders)
             AddHeaders(context, delay, opt.DelayAfter, remaining);
 
-        await Task.Delay(delay);
+        if (!opt.FakeDelay)
+            await Task.Delay(delay);
     }
 
     private static void AddHeaders(HttpContext context, int delay, int delayAfter, int remaining)
@@ -45,14 +46,17 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
         context.Response.Headers[Constants.RemainingHeader] = remaining.ToString();
     }
 
-    private static async Task<int> IncrementCount(string ip)
+    private static async Task<(int, int)> IncrementCount(string ip)
     {
-        var currentCount = await CacheHelper.Get(ip);
+        var now = DateTime.UtcNow.Millisecond;
+        var (currentCount, addedTimestamp) = await CacheHelper.Get(ip);
+        
         var newCount = currentCount + 1;
+        var ttl = SlowDownOptions.CurrentOptions.TimeWindow - now - addedTimestamp;
         
         await CacheHelper.Set(ip, newCount);
         
-        return newCount;
+        return (newCount, ttl);
     }
 
     private static int CalculateDelay(int requestCount)
@@ -62,7 +66,7 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
         if (opt.DelayAfter == 0 || opt.Delay == 0 || opt.TimeWindow == 0 || opt.MaxDelay == 0)
             return 0;
 
-        if (requestCount < opt.DelayAfter)
+        if (requestCount <= opt.DelayAfter)
             return 0;
 
         var remaining = Math.Max(requestCount - opt.DelayAfter, 0);

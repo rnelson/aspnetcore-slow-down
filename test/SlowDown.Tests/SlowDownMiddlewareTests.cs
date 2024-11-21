@@ -1,24 +1,32 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Nearform.AspNetCore.SlowDown;
+using Nearform.AspNetCore.SlowDown.Helpers;
 
 namespace SlowDown.Tests;
 
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
 public class SlowDownMiddlewareTests
 {
-    private static readonly SemaphoreSlim Semaphore = new(1,1);
-    
     [Fact]
-    public void Constructor_Works()
+    public async Task Constructor_Works()
     {
-        _ = UnitTestHelperMethods.CreateSlowDownMiddleware();
+        await CacheSemaphore.Semaphore.WaitAsync();
+
+        try
+        {
+            _ = UnitTestHelperMethods.CreateSlowDownMiddleware();
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
     }
 
     [Fact]
     public async Task HandleSlowDown_AddedCorrectHeadersAfterLimit()
     {
-        await Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync();
         
         try
         {
@@ -31,7 +39,7 @@ public class SlowDownMiddlewareTests
 
             // Set the current number of requests to 10. Calling InvokeAsync()
             // will increment the count to 11 before doing any math.
-            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 10);
+            await CacheHelper.Set("127.0.0.1", 10);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
@@ -44,18 +52,18 @@ public class SlowDownMiddlewareTests
 
             Assert.Equal(1000, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
             Assert.Equal(10, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
-            Assert.Equal(-1, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
+            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
         }
         finally
         {
-            Semaphore.Release();
+            CacheSemaphore.Semaphore.Release();
         }
     }
 
     [Fact]
     public async Task HandleSlowDown_AddedCorrectHeadersBeforeLimit()
     {
-        await Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync();
 
         try
         {
@@ -68,7 +76,7 @@ public class SlowDownMiddlewareTests
 
             // Set the current number of requests to 10. Calling InvokeAsync()
             // will increment the count to 11 before doing any math.
-            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 10);
+            await CacheHelper.Set("127.0.0.1", 10);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
@@ -81,18 +89,18 @@ public class SlowDownMiddlewareTests
 
             Assert.Equal(0, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
             Assert.Equal(50, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
-            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
+            Assert.Equal(39, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
         }
         finally
         {
-            Semaphore.Release();
+            CacheSemaphore.Semaphore.Release();
         }
     }
 
     [Fact]
     public async Task HandleSlowDown_DelayNotAddedUnnecessarily()
     {
-        await Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync();
         
         try
         {
@@ -102,7 +110,7 @@ public class SlowDownMiddlewareTests
                 DelayAfter = 10
             };
 
-            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 9);
+            await CacheHelper.Set("127.0.0.1", 9);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
@@ -115,24 +123,25 @@ public class SlowDownMiddlewareTests
         }
         finally
         {
-            Semaphore.Release();
+            CacheSemaphore.Semaphore.Release();
         }
     }
 
     [Fact]
     public async Task HandleSlowDown_DelayWorks()
     {
-        await Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync();
         
         try
         {
             SlowDownOptions.CurrentOptions = new()
             {
                 Cache = UnitTestHelperMethods.CreateCache(),
+                Delay = 2000,
                 DelayAfter = 10
             };
 
-            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 15);
+            await CacheHelper.Set("127.0.0.1", 11);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
@@ -145,14 +154,14 @@ public class SlowDownMiddlewareTests
         }
         finally
         {
-            Semaphore.Release();
+            CacheSemaphore.Semaphore.Release();
         }
     }
 
     [Fact]
     public async Task HandleSlowDown_ExcludesHeadersWhenDisabled()
     {
-        await Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync();
         
         try
         {
@@ -163,7 +172,7 @@ public class SlowDownMiddlewareTests
                 DelayAfter = 500
             };
 
-            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 84);
+            await CacheHelper.Set("127.0.0.1", 84);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
@@ -176,61 +185,98 @@ public class SlowDownMiddlewareTests
         }
         finally
         {
-            Semaphore.Release();
+            CacheSemaphore.Semaphore.Release();
         }
     }
 
     [Fact]
     public async Task HandleSlowDown_RemainingIsZeroWithNoWindow()
     {
-        await Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync();
         
         try
         {
+            const int startingRequestCount = 300;
+            const int delay = 50;
+            const int delayAfter = 100;
+            const int expectedDelay = ((startingRequestCount - delayAfter) * delay) + delay;
+            
             SlowDownOptions.CurrentOptions = new()
             {
                 AddHeaders = true,
                 Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 1,
-                TimeWindow = 0
+                Delay = delay,
+                DelayAfter = delayAfter,
+                FakeDelay = true,
+                TimeWindow = 1000
             };
-
-            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 300);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+            
+            // Set the current number of requests to 300. Expiration will be `TimeWindow`
+            // from now.
+            await CacheHelper.Set("127.0.0.1", startingRequestCount);
+            
+            // Wait one second after the window is set to expire. Between the added 1000ms
+            // and processing time for the above, we should be past the expiration time.
+            await Task.Delay(SlowDownOptions.CurrentOptions.TimeWindow + 1000);
 
+            // Trigger a single request, and make sure that things got reset.
             await middleware.InvokeAsync(context);
 
             Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
             Assert.True(context.Response.Headers.ContainsKey(Constants.RemainingHeader));
 
-            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
-            Assert.Equal(1, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
-            Assert.Equal(-300, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
+            Assert.Equal(expectedDelay, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
+            Assert.Equal(100, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
+            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
         }
         finally
         {
-            Semaphore.Release();
+            CacheSemaphore.Semaphore.Release();
         }
     }
     
     [Fact]
     public async Task InvokeAsync_WorksDefault()
     {
-        var context = UnitTestHelperMethods.CreateHttpContext();
-        var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+        await CacheSemaphore.Semaphore.WaitAsync();
 
-        await middleware.InvokeAsync(context);
+        try
+        {
+            var context = UnitTestHelperMethods.CreateHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            await middleware.InvokeAsync(context);
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
     }
     
     [Fact]
     public async Task InvokeAsync_WorksWithSlowDownDisabled()
     {
-        var context = UnitTestHelperMethods.CreateHttpContext();
-        var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+        await CacheSemaphore.Semaphore.WaitAsync();
 
-        await middleware.InvokeAsync(context);
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                SlowDownEnabled = false
+            };
+            
+            var context = UnitTestHelperMethods.CreateHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            await middleware.InvokeAsync(context);
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
     }
 }

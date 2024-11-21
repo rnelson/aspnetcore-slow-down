@@ -9,6 +9,14 @@ namespace Nearform.AspNetCore.SlowDown;
 public sealed class SlowDownOptions
 {
     /// <summary>
+    /// Flag indicating that the delay should not actually be applied.
+    /// </summary>
+    /// <remarks>
+    /// This is only intended for use with unit tests.
+    /// </remarks>
+    internal bool FakeDelay { get; set; } = false;
+    
+    /// <summary>
     /// Flag to enable or disable the middleware.
     /// </summary>
     public bool SlowDownEnabled { get; set; } = true;

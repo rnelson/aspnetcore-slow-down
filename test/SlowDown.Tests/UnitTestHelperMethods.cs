@@ -69,10 +69,10 @@ internal static class UnitTestHelperMethods
     public static SlowDownMiddleware CreateSlowDownMiddleware() =>
         new(_ => Task.CompletedTask, NullLogger<SlowDownMiddleware>.Instance);
     
-    public static HttpContext CreateXForwardedForHttpContext()
+    public static HttpContext CreateXForwardedForHttpContext(string ip = "127.0.0.1")
     {
         var context = new DefaultHttpContext();
-        context.Request.Headers["X-Forwarded-For"] = "127.0.0.1";
+        context.Request.Headers["X-Forwarded-For"] = ip;
         
         return context;
     }
