@@ -35,8 +35,13 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
         if (opt.AddHeaders)
             AddHeaders(context, delay, opt.DelayAfter, remaining);
 
-        if (!opt.FakeDelay)
-            await Task.Delay(delay);
+        if (delay > 0)
+        {
+            SlowDownOptions.CurrentOptions.OnLimitReached?.Invoke(context.Request);
+            
+            if (!opt.FakeDelay)
+                await Task.Delay(delay);
+        }
     }
 
     private static void AddHeaders(HttpContext context, int delay, int delayAfter, int remaining)

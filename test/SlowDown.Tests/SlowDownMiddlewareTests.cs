@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Http;
 using Nearform.AspNetCore.SlowDown;
 using Nearform.AspNetCore.SlowDown.Helpers;
 
@@ -182,6 +183,40 @@ public class SlowDownMiddlewareTests
             Assert.False(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.False(context.Response.Headers.ContainsKey(Constants.LimitHeader));
             Assert.False(context.Response.Headers.ContainsKey(Constants.RemainingHeader));
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
+    }
+
+    [Fact]
+    public async Task HandleSlowDown_OnLimitReached_Works()
+    {
+        await CacheSemaphore.Semaphore.WaitAsync();
+        
+        try
+        {
+            var flag = false;
+
+            Action<HttpRequest> onLimitReached = (req) => flag = true;
+            
+            SlowDownOptions.CurrentOptions = new()
+            {
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 1,
+                FakeDelay = true,
+                OnLimitReached = onLimitReached
+            };
+
+            await CacheHelper.Set("127.0.0.1", 5);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            await middleware.InvokeAsync(context);
+
+            Assert.True(flag);
         }
         finally
         {
