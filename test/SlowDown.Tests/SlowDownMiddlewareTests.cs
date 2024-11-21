@@ -213,9 +213,9 @@ public class SlowDownMiddlewareTests
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
-
+            
+            Assert.False(flag);
             await middleware.InvokeAsync(context);
-
             Assert.True(flag);
         }
         finally
