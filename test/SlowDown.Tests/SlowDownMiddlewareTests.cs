@@ -273,6 +273,34 @@ public class SlowDownMiddlewareTests
             CacheSemaphore.Semaphore.Release();
         }
     }
+
+    [Fact]
+    public async Task HandleSlowDown_SkilFailedRequests_Works()
+    {
+        await CacheSemaphore.Semaphore.WaitAsync();
+        
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 1,
+                FakeDelay = true,
+                OnLimitReached = (req) => throw new Exception()
+            };
+
+            await CacheHelper.Set("127.0.0.1", 5);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+            
+            await middleware.InvokeAsync(context);
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
+    }
     
     [Fact]
     public async Task InvokeAsync_WorksDefault()

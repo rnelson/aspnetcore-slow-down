@@ -11,7 +11,10 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
         try
         {
             if (SlowDownOptions.CurrentOptions.SlowDownEnabled)
+            {
                 await HandleSlowDown(context);
+                await HandleSkipConditions(context);
+            }
         }
         catch (Exception e)
         {
@@ -23,11 +26,30 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
         }
     }
 
+    private static async Task HandleSkipConditions(HttpContext context)
+    {
+        var opt = SlowDownOptions.CurrentOptions;
+        var ip = await AspNetCoreHelper.GetClientIp(context.Request);
+
+        if ((opt.SkipFailedRequests && context.Response.StatusCode >= 400) ||
+            (opt.SkipSuccessfulRequests && context.Response.StatusCode < 400))
+        {
+            var (newCount, _) = await ChangeCount(ip, -1);
+
+            if (opt.AddHeaders)
+            {
+                var delay = int.Parse(context.Request.Headers[Constants.DelayHeader].ToString());
+                var remaining = int.Parse(context.Request.Headers[Constants.DelayHeader].ToString());
+                AddHeaders(context, delay + 1, opt.DelayAfter, remaining + 1);
+            }
+        }
+    }
+
     private static async Task HandleSlowDown(HttpContext context)
     {
         var opt = SlowDownOptions.CurrentOptions;
         var ip = await AspNetCoreHelper.GetClientIp(context.Request);
-        var (newCount, _) = await IncrementCount(ip);
+        var (newCount, _) = await ChangeCount(ip);
 
         var delay = CalculateDelay(newCount);
         var remaining = Math.Max(opt.DelayAfter - newCount, 0);
@@ -51,12 +73,12 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
         context.Response.Headers[Constants.RemainingHeader] = remaining.ToString();
     }
 
-    private static async Task<(int, int)> IncrementCount(string ip)
+    private static async Task<(int, int)> ChangeCount(string ip, int delta = 1)
     {
         var now = DateTime.UtcNow.Millisecond;
         var (currentCount, addedTimestamp) = await CacheHelper.Get(ip);
         
-        var newCount = currentCount + 1;
+        var newCount = currentCount + delta;
         var ttl = SlowDownOptions.CurrentOptions.TimeWindow - now - addedTimestamp;
         
         await CacheHelper.Set(ip, newCount);
