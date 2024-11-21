@@ -67,6 +67,4 @@ public class CacheHelperTests
             CacheSemaphore.Semaphore.Release();
         }
     }
-    
-    // TODO: test cache expiration
 }

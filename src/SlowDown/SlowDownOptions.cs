@@ -14,7 +14,7 @@ public sealed class SlowDownOptions
     /// <remarks>
     /// This is only intended for use with unit tests.
     /// </remarks>
-    internal bool FakeDelay { get; set; } = false;
+    internal bool FakeDelay { get; set; }
     
     /// <summary>
     /// Flag to enable or disable the middleware.

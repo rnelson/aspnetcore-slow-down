@@ -199,7 +199,7 @@ public class SlowDownMiddlewareTests
             const int startingRequestCount = 300;
             const int delay = 50;
             const int delayAfter = 100;
-            const int expectedDelay = ((startingRequestCount - delayAfter) * delay) + delay;
+            const int expectedDelay = (startingRequestCount - delayAfter) * delay + delay;
             
             SlowDownOptions.CurrentOptions = new()
             {
