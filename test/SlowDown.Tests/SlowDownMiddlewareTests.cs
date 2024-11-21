@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Nearform.AspNetCore.SlowDown;
 
 namespace SlowDown.Tests;
@@ -89,6 +90,66 @@ public class SlowDownMiddlewareTests
     }
 
     [Fact]
+    public async Task HandleSlowDown_DelayNotAddedUnnecessarily()
+    {
+        await Semaphore.WaitAsync();
+        
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 10
+            };
+
+            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 9);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            var timer = Stopwatch.StartNew();
+            await middleware.InvokeAsync(context);
+            timer.Stop();
+            
+            Assert.True(timer.ElapsedMilliseconds < 1000);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    [Fact]
+    public async Task HandleSlowDown_DelayWorks()
+    {
+        await Semaphore.WaitAsync();
+        
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 10
+            };
+
+            await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 15);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+
+            var timer = Stopwatch.StartNew();
+            await middleware.InvokeAsync(context);
+            timer.Stop();
+            
+            Assert.True(timer.ElapsedMilliseconds > 1000);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    [Fact]
     public async Task HandleSlowDown_ExcludesHeadersWhenDisabled()
     {
         await Semaphore.WaitAsync();
@@ -102,8 +163,6 @@ public class SlowDownMiddlewareTests
                 DelayAfter = 500
             };
 
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
             await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 84);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
@@ -136,8 +195,6 @@ public class SlowDownMiddlewareTests
                 TimeWindow = 0
             };
 
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
             await SlowDownOptions.CurrentOptions.Cache.SetAsync("127.0.0.1", 300);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
