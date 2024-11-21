@@ -7,38 +7,65 @@ public class CacheHelperTests
     [Fact]
     public async Task GetHttpRequest_CreatesNewItemInCache()
     {
-        var (_, request) = UnitTestHelperMethods.Setup();
+        await CacheSemaphore.Semaphore.WaitAsync();
+
+        try
+        {
+            var (_, request) = UnitTestHelperMethods.Setup();
         
-        var (count, _) = await CacheHelper.Get(request);
-        Assert.Equal(0, count);
+            var (count, _) = await CacheHelper.Get(request);
+            Assert.Equal(0, count);
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
     }
     
     [Fact]
     public async Task GetHttpRequest_GetsItemFromCache()
     {
-        const int expected = 8;
-        var (_, request) = UnitTestHelperMethods.Setup();
+        await CacheSemaphore.Semaphore.WaitAsync();
+
+        try
+        {
+            const int expected = 8;
+            var (_, request) = UnitTestHelperMethods.Setup();
         
-        var (count, _) = await CacheHelper.Get(request);
-        Assert.Equal(0, count);
+            var (count, _) = await CacheHelper.Get(request);
+            Assert.Equal(0, count);
         
-        await CacheHelper.Set(request, expected);
-        (count, _) = await CacheHelper.Get(request);
-        Assert.Equal(expected, count);
+            await CacheHelper.Set(request, expected);
+            (count, _) = await CacheHelper.Get(request);
+            Assert.Equal(expected, count);
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
     }
     
     [Fact]
     public async Task GetHttpRequest_SetUpdatesItemInCache()
     {
-        const int expected = 5;
-        var (_, request) = UnitTestHelperMethods.Setup();
+        await CacheSemaphore.Semaphore.WaitAsync();
+
+        try
+        {
+            const int expected = 5;
+            var (_, request) = UnitTestHelperMethods.Setup();
         
-        var (count, _) = await CacheHelper.Get(request);
-        Assert.Equal(0, count);
+            var (count, _) = await CacheHelper.Get(request);
+            Assert.Equal(0, count);
         
-        await CacheHelper.Set(request, expected);
-        (count, _) = await CacheHelper.Get(request);
-        Assert.Equal(expected, count);
+            await CacheHelper.Set(request, expected);
+            (count, _) = await CacheHelper.Get(request);
+            Assert.Equal(expected, count);
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
     }
     
     // TODO: test cache expiration
