@@ -38,9 +38,9 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
 
             if (opt.AddHeaders)
             {
-                var delay = int.Parse(context.Request.Headers[Constants.DelayHeader].ToString());
-                var remaining = int.Parse(context.Request.Headers[Constants.DelayHeader].ToString());
-                AddHeaders(context, delay + 1, opt.DelayAfter, remaining + 1);
+                var delay = int.Parse(context.Response.Headers[Constants.DelayHeader].ToString());
+                var remaining = int.Parse(context.Response.Headers[Constants.DelayHeader].ToString());
+                AddHeaders(context, delay, opt.DelayAfter, remaining + 1);
             }
         }
     }

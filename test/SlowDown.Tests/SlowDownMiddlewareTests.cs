@@ -275,7 +275,7 @@ public class SlowDownMiddlewareTests
     }
 
     [Fact]
-    public async Task HandleSlowDown_SkilFailedRequests_Works()
+    public async Task HandleSlowDown_SkipFailedRequests_Works()
     {
         await CacheSemaphore.Semaphore.WaitAsync();
         
@@ -284,9 +284,10 @@ public class SlowDownMiddlewareTests
             SlowDownOptions.CurrentOptions = new()
             {
                 Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 1,
+                DelayAfter = 6,
                 FakeDelay = true,
-                OnLimitReached = (req) => throw new Exception()
+                //OnLimitReached = (req) => throw new Exception()
+                SkipFailedRequests = true
             };
 
             await CacheHelper.Set("127.0.0.1", 5);
@@ -294,7 +295,16 @@ public class SlowDownMiddlewareTests
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
             
+            context.Response.StatusCode = 404;
             await middleware.InvokeAsync(context);
+
+            Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.RemainingHeader));
+
+            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
+            Assert.Equal(6, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
+            Assert.Equal(1, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
         }
         finally
         {
