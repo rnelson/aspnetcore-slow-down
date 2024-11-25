@@ -37,7 +37,7 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
             (opt.SkipSuccessfulRequests && context.Response.StatusCode < 400) ||
             shouldSkip)
         {
-            var (newCount, _) = await ChangeCount(ip, -1);
+            await ChangeCount(ip, -1);
 
             if (opt.AddHeaders)
             {

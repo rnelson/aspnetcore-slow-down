@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.Http;
 using Nearform.AspNetCore.SlowDown;
 using Nearform.AspNetCore.SlowDown.Helpers;
 
@@ -199,14 +198,12 @@ public class SlowDownMiddlewareTests
         {
             var flag = false;
 
-            Action<HttpRequest> onLimitReached = (req) => flag = true;
-            
             SlowDownOptions.CurrentOptions = new()
             {
                 Cache = UnitTestHelperMethods.CreateCache(),
                 DelayAfter = 1,
                 FakeDelay = true,
-                OnLimitReached = onLimitReached
+                OnLimitReached = _ => flag = true
             };
 
             await CacheHelper.Set("127.0.0.1", 5);
@@ -360,7 +357,7 @@ public class SlowDownMiddlewareTests
                 Cache = UnitTestHelperMethods.CreateCache(),
                 DelayAfter = 6,
                 FakeDelay = true,
-                Skip = (_) => true
+                Skip = _ => true
             };
 
             await CacheHelper.Set("127.0.0.1", 5);
