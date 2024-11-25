@@ -85,7 +85,7 @@ public sealed class SlowDownOptions
     /// When <c>true</c>, failed requests (status &lt; 400) won't be counted.
     /// </summary>
     /// <remarks>
-    /// This only has an effect with requests that have failed before this middleware
+    /// This only has an effect with requests that have succeeded before this middleware
     /// runs. Any middleware or controllers that run after this may mark the request
     /// as having failed, but it will still count towards client requests here. 
     /// </remarks>

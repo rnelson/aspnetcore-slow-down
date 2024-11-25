@@ -286,7 +286,6 @@ public class SlowDownMiddlewareTests
                 Cache = UnitTestHelperMethods.CreateCache(),
                 DelayAfter = 6,
                 FakeDelay = true,
-                //OnLimitReached = (req) => throw new Exception()
                 SkipFailedRequests = true
             };
 
@@ -296,6 +295,43 @@ public class SlowDownMiddlewareTests
             var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
             
             context.Response.StatusCode = 404;
+            await middleware.InvokeAsync(context);
+
+            Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
+            Assert.True(context.Response.Headers.ContainsKey(Constants.RemainingHeader));
+
+            Assert.Equal(0, int.Parse(context.Response.Headers[Constants.DelayHeader].ToString()));
+            Assert.Equal(6, int.Parse(context.Response.Headers[Constants.LimitHeader].ToString()));
+            Assert.Equal(1, int.Parse(context.Response.Headers[Constants.RemainingHeader].ToString()));
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
+    }
+
+    [Fact]
+    public async Task HandleSlowDown_SkipSuccessfulRequests_Works()
+    {
+        await CacheSemaphore.Semaphore.WaitAsync();
+        
+        try
+        {
+            SlowDownOptions.CurrentOptions = new()
+            {
+                Cache = UnitTestHelperMethods.CreateCache(),
+                DelayAfter = 6,
+                FakeDelay = true,
+                SkipSuccessfulRequests = true
+            };
+
+            await CacheHelper.Set("127.0.0.1", 5);
+
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
+            
+            context.Response.StatusCode = 200;
             await middleware.InvokeAsync(context);
 
             Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
