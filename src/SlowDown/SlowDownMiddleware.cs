@@ -30,9 +30,12 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
     {
         var opt = SlowDownOptions.CurrentOptions;
         var ip = await AspNetCoreHelper.GetClientIp(context.Request);
+        
+        var shouldSkip = SlowDownOptions.CurrentOptions.Skip?.Invoke(context.Request) ?? false;
 
         if ((opt.SkipFailedRequests && context.Response.StatusCode >= 400) ||
-            (opt.SkipSuccessfulRequests && context.Response.StatusCode < 400))
+            (opt.SkipSuccessfulRequests && context.Response.StatusCode < 400) ||
+            shouldSkip)
         {
             var (newCount, _) = await ChangeCount(ip, -1);
 
