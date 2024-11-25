@@ -19,12 +19,12 @@ public static class SlowDownMiddlewareExtensions
     {
         var config = new SlowDownOptions();
         var provider = services.BuildServiceProvider();
+        
         var configuration = provider.GetService<IConfiguration>();
-
-        if (configAction != null)
-            configuration?.Bind(Constants.ConfigurationKey, config);
+        configuration?.Bind(Constants.ConfigurationKey, config);
         
         SlowDownOptions.CurrentOptions = config;
+        
         if (config.SlowDownEnabled)
             configAction?.Invoke(config);
 
