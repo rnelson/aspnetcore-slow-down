@@ -1,11 +1,29 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Nearform.AspNetCore.SlowDown.Helpers;
 
 namespace Nearform.AspNetCore.SlowDown;
 
-public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware> logger)
+public class SlowDownMiddleware
 {
+    private readonly RequestDelegate _next;
+    private readonly ILogger<SlowDownMiddleware> _logger;
+    private readonly IServiceProvider _serviceProvider;
+    
+    public SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware> logger,
+        IServiceProvider serviceProvider)
+    {
+        _next = next ?? throw new ArgumentNullException(nameof(next));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        
+        // We require HybridCache for caching. Make sure the user added it.
+        SlowDownOptions.CurrentOptions.Cache ??= 
+            (_serviceProvider.GetRequiredService(typeof(HybridCache)) as HybridCache)!;
+    }
+    
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -18,11 +36,11 @@ public class SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware
         }
         catch (Exception e)
         {
-            logger.LogError(e, "an error occurred while processing request: {Message}", e.Message);
+            _logger.LogError(e, "an error occurred while processing request: {Message}", e.Message);
         }
         finally
         {
-            await next(context);
+            await _next(context);
         }
     }
 

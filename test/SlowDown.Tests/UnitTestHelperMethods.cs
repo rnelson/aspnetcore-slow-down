@@ -11,6 +11,17 @@ namespace SlowDown.Tests;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 internal static class UnitTestHelperMethods
 {
+    private static readonly IServiceCollection _services;
+
+    [Experimental("EXTEXP0018")]
+    static UnitTestHelperMethods()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.Services.AddHybridCache();
+        
+        _services = builder.Services;
+    }
+    
     public static Tuple<HybridCache, HttpRequest> Setup()
     {
         var request = CreateXForwardedForHttpRequest();
@@ -67,7 +78,7 @@ internal static class UnitTestHelperMethods
         (_, _) => Task.FromResult(response);
     
     public static SlowDownMiddleware CreateSlowDownMiddleware() =>
-        new(_ => Task.CompletedTask, NullLogger<SlowDownMiddleware>.Instance);
+        new(_ => Task.CompletedTask, NullLogger<SlowDownMiddleware>.Instance, _services.BuildServiceProvider());
     
     public static HttpContext CreateXForwardedForHttpContext(string ip = "127.0.0.1")
     {

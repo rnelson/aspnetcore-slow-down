@@ -51,7 +51,7 @@ public sealed class SlowDownOptions
     /// A <see cref="HybridCache"/> instance to use for caching clients and
     /// their request counts.
     /// </summary>
-    public HybridCache Cache { get; set; } = null!;
+    public HybridCache? Cache { get; set; }
 
     /// <summary>
     /// Flag to add custom headers (<c>X-Slow-Down-Limit</c>, <c>X-Slow-Down-Remaining</c>,
