@@ -8,8 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{FE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicSlowDownExample", "samples\BasicSlowDownExample\BasicSlowDownExample.csproj", "{546A065D-4A2F-4F47-BEB5-C1042C2C3F06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCacheSlowDownExample", "samples\DistributedCacheSlowDownExample\DistributedCacheSlowDownExample.csproj", "{EF4E36AB-F202-4EFE-9E05-F0A3F4EDD38F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,13 +26,8 @@ Global
 		{546A065D-4A2F-4F47-BEB5-C1042C2C3F06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{546A065D-4A2F-4F47-BEB5-C1042C2C3F06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{546A065D-4A2F-4F47-BEB5-C1042C2C3F06}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF4E36AB-F202-4EFE-9E05-F0A3F4EDD38F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF4E36AB-F202-4EFE-9E05-F0A3F4EDD38F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EF4E36AB-F202-4EFE-9E05-F0A3F4EDD38F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EF4E36AB-F202-4EFE-9E05-F0A3F4EDD38F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{546A065D-4A2F-4F47-BEB5-C1042C2C3F06} = {FE1A9065-27CE-41E9-9163-6766244B613F}
-		{EF4E36AB-F202-4EFE-9E05-F0A3F4EDD38F} = {FE1A9065-27CE-41E9-9163-6766244B613F}
 	EndGlobalSection
 EndGlobal
