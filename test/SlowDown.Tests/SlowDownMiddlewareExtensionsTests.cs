@@ -64,22 +64,6 @@ public class SlowDownMiddlewareExtensionsTests
             Assert.True(SlowDownOptions.CurrentOptions.SkipFailedRequests);
             Assert.True(SlowDownOptions.CurrentOptions.SkipSuccessfulRequests);
             Assert.Equal(256, SlowDownOptions.CurrentOptions.CacheTimeout);
-        
-            /*
-    {
-      "SlowDown": {
-        "SlowDownEnabled": false,
-        "Delay": 16,
-        "DelayAfter": 32,
-        "MaxDelay": 64,
-        "TimeWindow": 128,
-        "AddHeaders": false,
-        "SkipFailedRequests": true,
-        "SkipSuccessfulRequests": true,
-        "CacheTimeout": 256
-      }
-    }
-             */
         }
         finally
         {
