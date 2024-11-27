@@ -11,7 +11,14 @@ builder.Services.AddHybridCache();
 builder.Services.AddRazorPages();
 
 // Add SlowDown middleware.
-builder.Services.AddSlowDown();
+builder.Services.AddSlowDown(options =>
+{
+    options.OnLimitReached = request =>
+    {
+        request.HttpContext.Response.Headers["X-SlowDown-OnLimitReached"] = "Hi!";
+    };
+    options.DelayAfter = 6;
+});
 
 var app = builder.Build();
 
