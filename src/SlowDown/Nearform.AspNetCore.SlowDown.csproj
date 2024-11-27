@@ -7,7 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <NoWarn>$(NoWarn);NU5104</NoWarn> <!-- NU5104 complains about preview builds here is no stable build of HybridCache yet -->
+        <NoWarn>$(NoWarn);NU5104</NoWarn> <!-- NU5104 complains about preview builds; there is no stable build of HybridCache yet -->
         <GenerateSBOM>true</GenerateSBOM>
         <Authors>Ross Nelson</Authors>
         <Company>Nearform</Company>
@@ -17,9 +17,9 @@
         <!--
         <PackageProjectUrl>https://github.com/rnelson/Libexec.AspnetCore.EnvironmentHeaders</PackageProjectUrl>
         <RepositoryUrl>https://github.com/rnelson/Libexec.AspnetCore.EnvironmentHeaders</RepositoryUrl>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
         -->
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <!-- <PackageReadmeFile>../../README.md</PackageReadmeFile> -->
         <PackageVersion>0.0.1</PackageVersion>
         <AssemblyVersion>0.0.1</AssemblyVersion>
         <FileVersion>0.0.1</FileVersion>
