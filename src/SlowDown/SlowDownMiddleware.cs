@@ -10,18 +10,17 @@ public class SlowDownMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<SlowDownMiddleware> _logger;
-    private readonly IServiceProvider _serviceProvider;
-    
+
     public SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware> logger,
         IServiceProvider serviceProvider)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        
+        var services = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
         // We require HybridCache for caching. Make sure the user added it.
         SlowDownOptions.CurrentOptions.Cache ??= 
-            (_serviceProvider.GetRequiredService(typeof(HybridCache)) as HybridCache)!;
+            (services.GetRequiredService(typeof(HybridCache)) as HybridCache)!;
     }
     
     public async Task InvokeAsync(HttpContext context)

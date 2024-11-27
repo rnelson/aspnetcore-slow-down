@@ -25,21 +25,19 @@ internal static class CacheHelper
             LocalCacheExpiration = TimeSpan.FromMilliseconds(SlowDownOptions.CurrentOptions.TimeWindow)
         };
 
-        if (opt.Cache is not null)
-        {
-            var count = await opt.Cache.GetOrCreateAsync($"{key}_count",
-                async _ => await Task.FromResult(0),
-                options: cacheOptions,
-                cancellationToken: ct);
-            var timestamp = await opt.Cache.GetOrCreateAsync($"{key}_timestamp",
-                async _ => await Task.FromResult(DateTime.UtcNow.Millisecond),
-                options: cacheOptions,
-                cancellationToken: ct);
+        if (opt.Cache is null)
+            return (0, -1);
+        
+        var count = await opt.Cache.GetOrCreateAsync($"{key}_count",
+            async _ => await Task.FromResult(0),
+            options: cacheOptions,
+            cancellationToken: ct);
+        var timestamp = await opt.Cache.GetOrCreateAsync($"{key}_timestamp",
+            async _ => await Task.FromResult(DateTime.UtcNow.Millisecond),
+            options: cacheOptions,
+            cancellationToken: ct);
 
-            return (count, timestamp);
-        }
-
-        return (0, -1);
+        return (count, timestamp);
     }
     
     public static async Task Set(HttpRequest request, int value)
