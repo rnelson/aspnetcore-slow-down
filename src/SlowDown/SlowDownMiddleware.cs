@@ -95,9 +95,7 @@ public class SlowDownMiddleware
 
     private static async Task<int> ChangeCount(string ip, int delta = 1)
     {
-        var now = DateTime.UtcNow.Millisecond;
         var currentCount = await CacheHelper.Get(ip);
-        
         var newCount = currentCount + delta;
         
         await CacheHelper.Set(ip, newCount);

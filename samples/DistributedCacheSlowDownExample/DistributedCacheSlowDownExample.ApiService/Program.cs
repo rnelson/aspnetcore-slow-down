@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Use the Aspire Redis connection
+builder.AddRedisClient(connectionName: "cache");
 builder.AddRedisDistributedCache("cache");
 
 // Add services to the container.

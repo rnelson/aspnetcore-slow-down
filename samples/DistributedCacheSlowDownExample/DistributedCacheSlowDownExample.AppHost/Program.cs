@@ -1,21 +1,22 @@
+// ReSharper disable InconsistentNaming
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache")
     .WithRedisInsight()
-    .WithRedisCommander()
-    ;
+    .WithRedisCommander();
 
-var apiService = builder
-    .AddProject<Projects.DistributedCacheSlowDownExample_ApiService>("apiservice")
+var api1_5556 = builder
+    .AddProject<Projects.DistributedCacheSlowDownExample_ApiService>("api1-5556")
     .WithReference(cache);
-var apiService2 = builder
-    .AddProject<Projects.DistributedCacheSlowDownExample_ApiService2>("apiservice2")
+var api2_5249 = builder
+    .AddProject<Projects.DistributedCacheSlowDownExample_ApiService2>("api2-5249")
     .WithReference(cache);
 
 builder.AddProject<Projects.DistributedCacheSlowDownExample_Web>("web")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
-    .WithReference(apiService)
-    .WithReference(apiService2);
+    .WithReference(api1_5556)
+    .WithReference(api2_5249);
 
 builder.Build().Run();
