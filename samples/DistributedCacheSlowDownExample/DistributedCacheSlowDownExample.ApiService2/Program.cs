@@ -1,4 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Nearform.AspNetCore.SlowDown;
+// ReSharper disable HeapView.ObjectAllocation
+// ReSharper disable HeapView.ObjectAllocation.Evident
+// ReSharper disable HeapView.DelegateAllocation
+// ReSharper disable HeapView.ClosureAllocation
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +46,9 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+[SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Global")]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
+internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

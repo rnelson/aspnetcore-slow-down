@@ -1,5 +1,6 @@
 using DistributedCacheSlowDownExample.Web;
 using DistributedCacheSlowDownExample.Web.Components;
+// ReSharper disable HeapView.ObjectAllocation.Evident
 
 var builder = WebApplication.CreateBuilder(args);
 
