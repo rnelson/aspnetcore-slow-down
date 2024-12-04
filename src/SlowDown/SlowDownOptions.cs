@@ -101,7 +101,7 @@ public sealed class SlowDownOptions
     /// Time limit, in ms, for the cache lookup to run. If the time limit is exceeded,
     /// the middleware will stop processing the request and allow it to proceed normally.
     /// </summary>
-    public int CacheTimeout { get; set; } = 1000;
+    public int CacheTimeout { get; set; } = 5000;
 
     /// <summary>
     /// Current configuration instance used by the <see cref="SlowDownMiddleware"/>.
