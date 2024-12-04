@@ -54,7 +54,8 @@ internal static class CacheHelper
         var cacheOptions = new HybridCacheEntryOptions
         {
             Expiration = TimeSpan.FromMilliseconds(SlowDownOptions.CurrentOptions.TimeWindow),
-            LocalCacheExpiration = TimeSpan.FromMilliseconds(SlowDownOptions.CurrentOptions.TimeWindow)
+            LocalCacheExpiration = TimeSpan.FromMilliseconds(SlowDownOptions.CurrentOptions.TimeWindow),
+            Flags = HybridCacheEntryFlags.DisableLocalCache
         };
 
         if (opt.Cache is not null)
