@@ -1,12 +1,16 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache")
-    //.WithRedisInsight()
-    //.WithRedisCommander()
+    .WithRedisInsight()
+    .WithRedisCommander()
     ;
 
-var apiService = builder.AddProject<Projects.DistributedCacheSlowDownExample_ApiService>("apiservice");
-var apiService2 = builder.AddProject<Projects.DistributedCacheSlowDownExample_ApiService2>("apiservice2");
+var apiService = builder
+    .AddProject<Projects.DistributedCacheSlowDownExample_ApiService>("apiservice")
+    .WithReference(cache);
+var apiService2 = builder
+    .AddProject<Projects.DistributedCacheSlowDownExample_ApiService2>("apiservice2")
+    .WithReference(cache);
 
 builder.AddProject<Projects.DistributedCacheSlowDownExample_Web>("webfrontend")
     .WithExternalHttpEndpoints()

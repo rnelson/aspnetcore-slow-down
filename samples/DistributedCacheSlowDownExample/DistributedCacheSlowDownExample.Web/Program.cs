@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
 builder.AddServiceDefaults();
+builder.AddRedisClient("cache");
 builder.AddRedisOutputCache("cache");
 
 // Add services to the container.
