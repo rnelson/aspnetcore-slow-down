@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,7 @@ using Nearform.AspNetCore.SlowDown.Helpers;
 
 namespace Nearform.AspNetCore.SlowDown;
 
+[SuppressMessage("ReSharper", "HeapView.ObjectAllocation")]
 public class SlowDownMiddleware
 {
     private readonly RequestDelegate _next;

@@ -6,6 +6,8 @@ using Nearform.AspNetCore.SlowDown.Helpers;
 namespace Nearform.AspNetCore.SlowDown;
 
 [SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
+[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+[SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
 public sealed class SlowDownOptions
 {
     /// <summary>
@@ -106,5 +108,6 @@ public sealed class SlowDownOptions
     /// <summary>
     /// Current configuration instance used by the <see cref="SlowDownMiddleware"/>.
     /// </summary>
+    [SuppressMessage("ReSharper", "HeapView.ObjectAllocation.Evident", Justification = "Initializing the options object")]
     internal static SlowDownOptions CurrentOptions { get; set; } = new();
 }

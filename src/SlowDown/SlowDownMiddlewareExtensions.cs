@@ -14,6 +14,7 @@ public static class SlowDownMiddlewareExtensions
     /// <param name="services">The service collection.</param>
     /// <param name="configAction">Configuration action.</param>
     /// <returns></returns>
+    [SuppressMessage("ReSharper", "HeapView.ObjectAllocation.Evident", Justification = "Initializing the options object")]
     public static IServiceCollection AddSlowDown(this IServiceCollection services,
         Action<SlowDownOptions>? configAction = null)
     {
