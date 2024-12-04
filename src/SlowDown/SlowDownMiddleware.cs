@@ -69,7 +69,7 @@ public class SlowDownMiddleware
     {
         var opt = SlowDownOptions.CurrentOptions;
         var ip = await AspNetCoreHelper.GetClientIp(context.Request);
-        var (newCount, _) = await ChangeCount(ip);
+        var newCount = await ChangeCount(ip);
 
         var delay = CalculateDelay(newCount);
         var remaining = Math.Max(opt.DelayAfter - newCount, 0);
@@ -93,17 +93,16 @@ public class SlowDownMiddleware
         context.Response.Headers[Constants.RemainingHeader] = remaining.ToString();
     }
 
-    private static async Task<(int, int)> ChangeCount(string ip, int delta = 1)
+    private static async Task<int> ChangeCount(string ip, int delta = 1)
     {
         var now = DateTime.UtcNow.Millisecond;
-        var (currentCount, addedTimestamp) = await CacheHelper.Get(ip);
+        var currentCount = await CacheHelper.Get(ip);
         
         var newCount = currentCount + delta;
-        var ttl = SlowDownOptions.CurrentOptions.TimeWindow - now - addedTimestamp;
         
         await CacheHelper.Set(ip, newCount);
         
-        return (newCount, ttl);
+        return newCount;
     }
 
     private static int CalculateDelay(int requestCount)
