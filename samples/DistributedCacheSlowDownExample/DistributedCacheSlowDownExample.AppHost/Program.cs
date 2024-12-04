@@ -12,7 +12,7 @@ var apiService2 = builder
     .AddProject<Projects.DistributedCacheSlowDownExample_ApiService2>("apiservice2")
     .WithReference(cache);
 
-builder.AddProject<Projects.DistributedCacheSlowDownExample_Web>("webfrontend")
+builder.AddProject<Projects.DistributedCacheSlowDownExample_Web>("web")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
     .WithReference(apiService)
