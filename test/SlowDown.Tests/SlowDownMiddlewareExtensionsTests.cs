@@ -54,16 +54,18 @@ public class SlowDownMiddlewareExtensionsTests(SlowDownOptions options)
             await using var app = builder.Build();
             app.UseRouting();
             app.UseSlowDown();
+            
+            var opt = services.BuildServiceProvider().GetRequiredService<SlowDownOptions>();
 
-            Assert.False(_options.SlowDownEnabled);
-            Assert.Equal(16, _options.Delay);
-            Assert.Equal(32, _options.DelayAfter);
-            Assert.Equal(64, _options.MaxDelay);
-            Assert.Equal(128, _options.TimeWindow);
-            Assert.False(_options.AddHeaders);
-            Assert.True(_options.SkipFailedRequests);
-            Assert.True(_options.SkipSuccessfulRequests);
-            Assert.Equal(256, _options.CacheTimeout);
+            Assert.False(opt.SlowDownEnabled);
+            Assert.Equal(16, opt.Delay);
+            Assert.Equal(32, opt.DelayAfter);
+            Assert.Equal(64, opt.MaxDelay);
+            Assert.Equal(128, opt.TimeWindow);
+            Assert.False(opt.AddHeaders);
+            Assert.True(opt.SkipFailedRequests);
+            Assert.True(opt.SkipSuccessfulRequests);
+            Assert.Equal(256, opt.CacheTimeout);
         }
         finally
         {
