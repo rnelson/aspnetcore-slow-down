@@ -1,4 +1,5 @@
-﻿using Nearform.AspNetCore.SlowDown.Helpers;
+﻿using Microsoft.AspNetCore.Http;
+using Nearform.AspNetCore.SlowDown.Helpers;
 using Xunit.DependencyInjection;
 
 namespace SlowDown.Tests.Helpers;
@@ -16,17 +17,18 @@ public class CacheHelperTests(CacheHelper cacheHelper)
     public async Task GetHttpRequest_CreatesNewItemInCache()
     {
         await CacheSemaphore.Semaphore.WaitAsync();
+        HttpRequest? request = null;
 
         try
         {
-            var request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
+            request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
         
             var count = await _cache.Get(request, tags: _tags);
             Assert.Equal(0, count);
         }
         finally
         {
-            await _cache.RemoveAll(_tags);
+            if (request != null) await _cache.Remove(request);
             CacheSemaphore.Semaphore.Release();
         }
     }
@@ -36,11 +38,12 @@ public class CacheHelperTests(CacheHelper cacheHelper)
     public async Task GetHttpRequest_GetsItemFromCache()
     {
         await CacheSemaphore.Semaphore.WaitAsync();
+        HttpRequest? request = null;
 
         try
         {
             const int expected = 8;
-            var request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
+            request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
         
             var count = await _cache.Get(request, tags: _tags);
             Assert.Equal(0, count);
@@ -51,7 +54,7 @@ public class CacheHelperTests(CacheHelper cacheHelper)
         }
         finally
         {
-            await _cache.RemoveAll(_tags);
+            if (request != null) await _cache.Remove(request);
             CacheSemaphore.Semaphore.Release();
         }
     }
@@ -79,11 +82,12 @@ public class CacheHelperTests(CacheHelper cacheHelper)
     public async Task GetHttpRequest_SetUpdatesItemInCache()
     {
         await CacheSemaphore.Semaphore.WaitAsync();
+        HttpRequest? request = null;
 
         try
         {
             const int expected = 5;
-            var request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
+            request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
         
             var count = await _cache.Get(request, tags: _tags);
             Assert.Equal(0, count);
@@ -94,7 +98,7 @@ public class CacheHelperTests(CacheHelper cacheHelper)
         }
         finally
         {
-            await _cache.RemoveAll(_tags);
+            if (request != null) await _cache.Remove(request);
             CacheSemaphore.Semaphore.Release();
         }
     }

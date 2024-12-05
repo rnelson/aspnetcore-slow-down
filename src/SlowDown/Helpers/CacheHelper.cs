@@ -49,13 +49,13 @@ public class CacheHelper(SlowDownOptions options, HybridCache cache)
         var ct = cancellationToken ?? GetCancellationToken();
         var key = await _options.KeyGenerator(request, ct);
         
-        await _cache.RemoveAsync(key, cancellationToken: ct);
+        await _cache.RemoveAsync($"{key}_count", cancellationToken: ct);
     }
 
     public async Task Remove(string key, CancellationToken? cancellationToken = null)
     {
         var ct = cancellationToken ?? GetCancellationToken();
-        await _cache.RemoveAsync(key, cancellationToken: ct);
+        await _cache.RemoveAsync($"{key}_count", cancellationToken: ct);
     }
 
     public async Task RemoveAll(IEnumerable<string> tags, CancellationToken? cancellationToken = null)
