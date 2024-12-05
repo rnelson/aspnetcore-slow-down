@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -340,6 +341,16 @@ public class SlowDownMiddlewareTests
                 options.DelayAfter = 6;
                 options.FakeDelay = true;
                 options.SkipFailedRequests = true;
+            }, app =>
+            {
+                app.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapGet("/err", context =>
+                    {
+                        context.Response.StatusCode = 404;
+                        return Task.CompletedTask;
+                    });
+                });
             });
             
             // Start the test server.
@@ -354,7 +365,7 @@ public class SlowDownMiddlewareTests
             // Create an HttpRequestMessage to send to the test server.
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
-            message.RequestUri = new Uri("/does_not_exist");
+            message.RequestUri = new Uri("/err", UriKind.Relative);
             
             // Send the request.
             var response = await client.SendAsync(message);
@@ -399,7 +410,7 @@ public class SlowDownMiddlewareTests
             // Create an HttpRequestMessage to send to the test server.
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
-            message.RequestUri = new Uri("/");
+            message.RequestUri = new Uri("/", UriKind.Relative);
             
             // Send the request.
             var response = await client.SendAsync(message);

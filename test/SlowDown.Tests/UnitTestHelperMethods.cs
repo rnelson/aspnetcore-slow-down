@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
@@ -55,7 +56,8 @@ internal static class UnitTestHelperMethods
     public static Func<HttpRequest, CancellationToken, Task<string>> CreateKeyGenerator(string response) =>
         (_, _) => Task.FromResult(response);
 
-    public static HostBuilder CreateWebHostBuilder(Action<SlowDownOptions>? configAction = null) =>
+    public static HostBuilder CreateWebHostBuilder(Action<SlowDownOptions>? configAction = null,
+        Action<IApplicationBuilder>? appAction = null) =>
         (new HostBuilder()
             .ConfigureWebHost(builder =>
             {
@@ -63,6 +65,8 @@ internal static class UnitTestHelperMethods
                     .UseTestServer()
                     .ConfigureServices(services =>
                     {
+                        services.AddRouting();
+                        
 #pragma warning disable EXTEXP0018
                         services.AddHybridCache();
                         services.AddSlowDown(configAction);
@@ -70,7 +74,9 @@ internal static class UnitTestHelperMethods
                     })
                     .Configure(app =>
                     {
+                        app.UseRouting();
                         app.UseSlowDown();
+                        appAction?.Invoke(app);
                     });
             }) as HostBuilder)!;
 
