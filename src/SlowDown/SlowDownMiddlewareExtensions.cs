@@ -23,7 +23,7 @@ public static class SlowDownMiddlewareExtensions
 #pragma warning disable EXTEXP0018
         services.AddHybridCache();
 #pragma warning restore EXTEXP0018
-        services.AddSingleton(typeof(CacheHelper));
+        services.AddSingleton<CacheHelper>();
         
         var config = new SlowDownOptions();
         var provider = services.BuildServiceProvider();
