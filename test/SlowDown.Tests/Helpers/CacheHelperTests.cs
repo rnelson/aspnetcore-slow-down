@@ -59,24 +59,6 @@ public class CacheHelperTests(CacheHelper cacheHelper)
         }
     }
     
-    // [Fact]
-    // public async Task GetHttpRequest_GetsNullWithNoCache()
-    // {
-    //     await CacheSemaphore.Semaphore.WaitAsync();
-    //
-    //     try
-    //     {
-    //         var (_, request) = UnitTestHelperMethods.Setup();
-    //     
-    //         var count = await _cache.Get(request);
-    //         Assert.Equal(0, count);
-    //     }
-    //     finally
-    //     {
-    //         CacheSemaphore.Semaphore.Release();
-    //     }
-    // }
-    
     [Fact]
     [DisableParallelization]
     public async Task GetHttpRequest_SetUpdatesItemInCache()
