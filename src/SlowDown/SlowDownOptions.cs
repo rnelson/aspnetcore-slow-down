@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Hybrid;
 using Nearform.AspNetCore.SlowDown.Helpers;
 
 namespace Nearform.AspNetCore.SlowDown;
@@ -8,7 +7,7 @@ namespace Nearform.AspNetCore.SlowDown;
 [SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
-public sealed class SlowDownOptions
+public class SlowDownOptions
 {
     /// <summary>
     /// Flag indicating that the delay should not actually be applied.
@@ -48,12 +47,12 @@ public sealed class SlowDownOptions
     /// counts are kept in memory. Set to <c>0</c> to disable delaying.
     /// </summary>
     public int TimeWindow { get; set; } = 30000;
-    
-    /// <summary>
-    /// A <see cref="HybridCache"/> instance to use for caching clients and
-    /// their request counts.
-    /// </summary>
-    public HybridCache? Cache { get; set; }
+
+    // /// <summary>
+    // /// A <see cref="HybridCache"/> instance to use for caching clients and
+    // /// their request counts.
+    // /// </summary>
+    // public HybridCache Cache { get; set; } = _cache;
 
     /// <summary>
     /// Flag to add custom headers (<c>X-Slow-Down-Limit</c>, <c>X-Slow-Down-Remaining</c>,
@@ -104,10 +103,4 @@ public sealed class SlowDownOptions
     /// the middleware will stop processing the request and allow it to proceed normally.
     /// </summary>
     public int CacheTimeout { get; set; } = 5000;
-
-    /// <summary>
-    /// Current configuration instance used by the <see cref="SlowDownMiddleware"/>.
-    /// </summary>
-    [SuppressMessage("ReSharper", "HeapView.ObjectAllocation.Evident", Justification = "Initializing the options object")]
-    internal static SlowDownOptions CurrentOptions { get; set; } = new();
 }
