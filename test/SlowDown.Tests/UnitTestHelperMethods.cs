@@ -1,5 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Nearform.AspNetCore.SlowDown;
 
 namespace SlowDown.Tests;
@@ -7,6 +11,20 @@ namespace SlowDown.Tests;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 internal static class UnitTestHelperMethods
 {
+    public static HttpRequestMessage ConvertToHttpRequestMessage(HttpRequest request)
+    {
+        var message = new HttpRequestMessage
+        {
+            Content = new StreamContent(request.Body),
+            Method = string.IsNullOrEmpty(request.Method) ? HttpMethod.Get : new(request.Method)
+        };
+        
+        foreach (var header in request.Headers)
+            message.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+        
+        return message;
+    }
+    
     public static CancellationToken CreateCancellationToken()
     {
         var cancellationTokenSource = new CancellationTokenSource();
@@ -37,17 +55,24 @@ internal static class UnitTestHelperMethods
     public static Func<HttpRequest, CancellationToken, Task<string>> CreateKeyGenerator(string response) =>
         (_, _) => Task.FromResult(response);
 
-    // public static SlowDownMiddleware CreateSlowDownMiddleware()
-    // {
-    //     var services = Services.BuildServiceProvider();
-    //     var options = services.GetRequiredService<SlowDownOptions>();
-    //     var cacheHelper = services.GetRequiredService<CacheHelper>();
-    //     
-    //     return new(_ => Task.CompletedTask,
-    //         NullLogger<SlowDownMiddleware>.Instance,
-    //         options,
-    //         cacheHelper);
-    // }
+    public static HostBuilder CreateWebHostBuilder(Action<SlowDownOptions>? configAction = null) =>
+        (new HostBuilder()
+            .ConfigureWebHost(builder =>
+            {
+                builder
+                    .UseTestServer()
+                    .ConfigureServices(services =>
+                    {
+#pragma warning disable EXTEXP0018
+                        services.AddHybridCache();
+                        services.AddSlowDown(configAction);
+#pragma warning restore EXTEXP0018
+                    })
+                    .Configure(app =>
+                    {
+                        app.UseSlowDown();
+                    });
+            }) as HostBuilder)!;
 
     public static HttpContext CreateXForwardedForHttpContext(string ip = "127.0.0.1")
     {

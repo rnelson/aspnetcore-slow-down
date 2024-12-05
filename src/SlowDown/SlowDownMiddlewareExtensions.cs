@@ -19,7 +19,7 @@ public static class SlowDownMiddlewareExtensions
     public static IServiceCollection AddSlowDown(this IServiceCollection services,
         Action<SlowDownOptions>? configAction = null)
     {
-        // Instantiate our dependencies 
+        // Instantiate our dependencies
 #pragma warning disable EXTEXP0018
         services.AddHybridCache();
 #pragma warning restore EXTEXP0018
