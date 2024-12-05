@@ -2,9 +2,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nearform.AspNetCore.SlowDown;
+using Xunit.DependencyInjection;
 
 namespace SlowDown.Tests;
 
+[Startup(typeof(Startup))]
 public class SlowDownMiddlewareExtensionsTests(SlowDownOptions options)
     : IClassFixture<SlowDownOptions>
 {

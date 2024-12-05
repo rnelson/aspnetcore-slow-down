@@ -2,9 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using Nearform.AspNetCore.SlowDown;
 using Nearform.AspNetCore.SlowDown.Helpers;
+using Xunit.DependencyInjection;
 
 namespace SlowDown.Tests;
 
+[Startup(typeof(Startup))]
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
 public class SlowDownMiddlewareTests(SlowDownOptions options, CacheHelper cacheHelper, SlowDownMiddleware middleware)
     : IClassFixture<SlowDownOptions>, IClassFixture<CacheHelper>, IClassFixture<SlowDownMiddleware>

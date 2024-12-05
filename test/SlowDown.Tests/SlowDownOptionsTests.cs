@@ -2,9 +2,11 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
 using Nearform.AspNetCore.SlowDown;
+using Xunit.DependencyInjection;
 
 namespace SlowDown.Tests;
 
+[Startup(typeof(Startup))]
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
 public class SlowDownOptionsTests
 {
@@ -24,7 +26,7 @@ public class SlowDownOptionsTests
         Assert.False(options.SkipFailedRequests);
         Assert.False(options.SkipSuccessfulRequests);
         Assert.Null(options.Skip);
-        Assert.Equal(1000, options.CacheTimeout);
+        Assert.Equal(5000, options.CacheTimeout);
     }
     
     [Fact]
