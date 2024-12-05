@@ -58,4 +58,14 @@ public class AspNetCoreHelperTests
         
         Assert.Equal(expected, clientIp);
     }
+    
+    [Fact]
+    public async Task GetClientIp_ThrowsExceptionWhenExpected()
+    {
+        var context = new DefaultHttpContext();
+        var options = new SlowDownOptions();
+        var cancellationToken = UnitTestHelperMethods.CreateCancellationToken();
+        
+        await Assert.ThrowsAsync<HttpProtocolException>(async () => await options.KeyGenerator(context.Request, cancellationToken));
+    }
 }
