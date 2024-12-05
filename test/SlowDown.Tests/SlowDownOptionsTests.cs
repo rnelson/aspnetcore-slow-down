@@ -9,7 +9,15 @@ namespace SlowDown.Tests;
 [Startup(typeof(Startup))]
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
 public class SlowDownOptionsTests
+    : IClassFixture<AspNetTestServerFixture>
 {
+    private readonly SlowDown.Tests.AspNetTestServerFixture _aspNetTestServerFixture;
+
+    public SlowDownOptionsTests(SlowDown.Tests.AspNetTestServerFixture aspNetTestServerFixture)
+    {
+        _aspNetTestServerFixture = aspNetTestServerFixture;
+    }
+
     [Fact]
     public void Constructor_HasExpectedDefaults()
     {
