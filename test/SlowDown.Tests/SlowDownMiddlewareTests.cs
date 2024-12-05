@@ -272,7 +272,7 @@ public class SlowDownMiddlewareTests
     }
 
     [Fact]
-    public async Task HandleSlowDown_RemainingIsZeroWithNoWindow()
+    public async Task HandleSlowDown_ExpectedDelayIsCorrectlyCalculated()
     {
         await CacheSemaphore.Semaphore.WaitAsync();
         
@@ -289,7 +289,6 @@ public class SlowDownMiddlewareTests
                 options.Delay = delay;
                 options.DelayAfter = delayAfter;
                 options.FakeDelay = true;
-                options.TimeWindow = 1000;
             });
             
             // Start the test server.
@@ -308,10 +307,6 @@ public class SlowDownMiddlewareTests
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
-            // Wait one second after the window is set to expire. Between the added 1000ms
-            // and processing time for the above, we should be past the expiration time.
-            await Task.Delay(options.TimeWindow + 1000);
-            
             // Send the request.
             var response = await client.SendAsync(message);
 
@@ -322,6 +317,51 @@ public class SlowDownMiddlewareTests
             Assert.Equal(expectedDelay, int.Parse(response.Headers.GetValues(Constants.DelayHeader).First()));
             Assert.Equal(100, int.Parse(response.Headers.GetValues(Constants.LimitHeader).First()));
             Assert.Equal(0, int.Parse(response.Headers.GetValues(Constants.RemainingHeader).First()));
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
+    }
+
+    [Fact]
+    public async Task HandleSlowDown_RemainingIsZeroWithNoWindow()
+    {
+        await CacheSemaphore.Semaphore.WaitAsync();
+        
+        try
+        {
+            var builder = UnitTestHelperMethods.CreateWebHostBuilder(options =>
+            {
+                options.AddHeaders = true;
+                options.Delay = 50;
+                options.DelayAfter = 100;
+                options.FakeDelay = true;
+                options.TimeWindow = 0;
+            });
+            
+            // Start the test server.
+            var host = await builder.StartAsync();
+            var client = host.GetTestClient();
+            
+            // Grab the configured options.
+            var options = host.Services.GetRequiredService<SlowDownOptions>();
+            
+            // Set the current number of requests to 10. Calling InvokeAsync()
+            // will increment the count to 11 before doing any math.
+            var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
+            await cache.Set("127.0.0.1", 300);
+
+            // Create an HttpRequestMessage to send to the test server.
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
+            
+            // Send the request.
+            var response = await client.SendAsync(message);
+
+            Assert.False(response.Headers.Contains(Constants.DelayHeader));
+            Assert.False(response.Headers.Contains(Constants.LimitHeader));
+            Assert.False(response.Headers.Contains(Constants.RemainingHeader));
         }
         finally
         {
