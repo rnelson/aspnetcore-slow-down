@@ -1,74 +1,56 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Nearform.AspNetCore.SlowDown.Helpers;
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "HeapView.ObjectAllocation")]
 [SuppressMessage("ReSharper", "HeapView.ObjectAllocation.Evident")]
-internal static class CacheHelper
+public class CacheHelper(SlowDownOptions options, IDistributedCache distributedCache)
 {
-    public static async Task<int> Get(HttpRequest request)
+    private readonly SlowDownOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly IDistributedCache _cache = distributedCache ?? throw new ArgumentNullException(nameof(distributedCache));
+    
+    public async Task<int> Get(HttpRequest request)
     {
         var ct = GetCancellationToken();
-        var opt = SlowDownOptions.CurrentOptions;
-        var key = await opt.KeyGenerator(request, ct);
+        var key = await _options.KeyGenerator(request, ct);
 
         return await Get(key);
     }
 
-    public static async Task<int> Get(string key)
+    public async Task<int> Get(string key)
     {
         var ct = GetCancellationToken();
-        var opt = SlowDownOptions.CurrentOptions;
 
-        var cacheOptions = new HybridCacheEntryOptions
-        {
-            Expiration = TimeSpan.FromMilliseconds(SlowDownOptions.CurrentOptions.TimeWindow),
-            LocalCacheExpiration = TimeSpan.FromMilliseconds(SlowDownOptions.CurrentOptions.TimeWindow),
-            Flags = HybridCacheEntryFlags.DisableLocalCache
-        };
-
-        if (opt.Cache is null)
-            return 0;
+        if (int.TryParse(await _cache.GetStringAsync($"{key}_count", ct), out var count))
+            return count;
         
-        var count = await opt.Cache.GetOrCreateAsync($"{key}_count",
-            async _ => await Task.FromResult(0),
-            options: cacheOptions,
-            cancellationToken: ct);
-
+        count = 0;
+        await _cache.SetStringAsync($"{key}_count", count.ToString(), token: ct);
+        
         return count;
     }
     
-    public static async Task Set(HttpRequest request, int value)
+    public async Task Set(HttpRequest request, int value)
     {
         var ct = GetCancellationToken();
-        var opt = SlowDownOptions.CurrentOptions;
-        var key = await opt.KeyGenerator(request, ct);
+        var key = await _options.KeyGenerator(request, ct);
 
         await Set(key, value);
     }
 
-    public static async Task Set(string key, int value)
+    public async Task Set(string key, int value)
     {
         var ct = GetCancellationToken();
-        var opt = SlowDownOptions.CurrentOptions;
-
-        var cacheOptions = new HybridCacheEntryOptions
-        {
-            Expiration = TimeSpan.FromMilliseconds(SlowDownOptions.CurrentOptions.TimeWindow),
-            LocalCacheExpiration = TimeSpan.FromMilliseconds(SlowDownOptions.CurrentOptions.TimeWindow),
-            Flags = HybridCacheEntryFlags.DisableLocalCache
-        };
-
-        if (opt.Cache is not null)
-            await opt.Cache.SetAsync($"{key}_count", value, options: cacheOptions, cancellationToken: ct);
+        
+        await _cache.SetStringAsync($"{key}_count", value.ToString(), token: ct);
     }
     
-    private static CancellationToken GetCancellationToken()
+    private CancellationToken GetCancellationToken()
     {
-        var timeout = SlowDownOptions.CurrentOptions.CacheTimeout;
+        var timeout = _options.CacheTimeout;
         
         var source = new CancellationTokenSource();
         source.CancelAfter(TimeSpan.FromMilliseconds(timeout));
