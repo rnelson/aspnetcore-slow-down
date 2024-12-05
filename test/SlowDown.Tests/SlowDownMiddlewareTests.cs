@@ -6,22 +6,27 @@ using Nearform.AspNetCore.SlowDown.Helpers;
 namespace SlowDown.Tests;
 
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
-public class SlowDownMiddlewareTests
+public class SlowDownMiddlewareTests(SlowDownOptions options, CacheHelper cacheHelper, SlowDownMiddleware middleware)
+    : IClassFixture<SlowDownOptions>, IClassFixture<CacheHelper>, IClassFixture<SlowDownMiddleware>
 {
-    [Fact]
-    public async Task Constructor_Works()
-    {
-        await CacheSemaphore.Semaphore.WaitAsync();
-
-        try
-        {
-            _ = UnitTestHelperMethods.CreateSlowDownMiddleware();
-        }
-        finally
-        {
-            CacheSemaphore.Semaphore.Release();
-        }
-    }
+    private readonly SlowDownOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly CacheHelper _cache = cacheHelper ?? throw new ArgumentNullException(nameof(cacheHelper));
+    private readonly SlowDownMiddleware _middleware = middleware ?? throw new ArgumentNullException(nameof(middleware));
+    
+    // [Fact]
+    // public async Task Constructor_Works()
+    // {
+    //     await CacheSemaphore.Semaphore.WaitAsync();
+    //
+    //     try
+    //     {
+    //         _ = UnitTestHelperMethods.CreateSlowDownMiddleware();
+    //     }
+    //     finally
+    //     {
+    //         CacheSemaphore.Semaphore.Release();
+    //     }
+    // }
 
     [Fact]
     public async Task HandleSlowDown_AddedCorrectHeadersAfterLimit()
@@ -30,21 +35,16 @@ public class SlowDownMiddlewareTests
         
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                AddHeaders = true,
-                Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 10
-            };
+            _options.AddHeaders = true;
+            _options.DelayAfter = 10;
 
             // Set the current number of requests to 10. Calling InvokeAsync()
             // will increment the count to 11 before doing any math.
-            await CacheHelper.Set("127.0.0.1", 10);
+            await _cache.Set("127.0.0.1", 10);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
 
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
 
             Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
@@ -67,21 +67,16 @@ public class SlowDownMiddlewareTests
 
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                AddHeaders = true,
-                Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 50
-            };
+            _options.AddHeaders = true;
+            _options.DelayAfter = 50;
 
             // Set the current number of requests to 10. Calling InvokeAsync()
             // will increment the count to 11 before doing any math.
-            await CacheHelper.Set("127.0.0.1", 10);
+            await _cache.Set("127.0.0.1", 10);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
 
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
 
             Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
@@ -104,19 +99,14 @@ public class SlowDownMiddlewareTests
         
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 10
-            };
+            _options.DelayAfter = 10;
 
-            await CacheHelper.Set("127.0.0.1", 9);
+            await _cache.Set("127.0.0.1", 9);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
 
             var timer = Stopwatch.StartNew();
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
             timer.Stop();
             
             Assert.True(timer.ElapsedMilliseconds < 1000);
@@ -134,20 +124,15 @@ public class SlowDownMiddlewareTests
         
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                Cache = UnitTestHelperMethods.CreateCache(),
-                Delay = 2000,
-                DelayAfter = 10
-            };
+            _options.Delay = 2000;
+            _options.DelayAfter = 10;
 
-            await CacheHelper.Set("127.0.0.1", 11);
+            await _cache.Set("127.0.0.1", 11);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
-
+            
             var timer = Stopwatch.StartNew();
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
             timer.Stop();
             
             Assert.True(timer.ElapsedMilliseconds > 1000);
@@ -165,19 +150,14 @@ public class SlowDownMiddlewareTests
         
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                AddHeaders = false,
-                Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 500
-            };
+            _options.AddHeaders = false;
+            _options.DelayAfter = 500;
 
-            await CacheHelper.Set("127.0.0.1", 84);
+            await _cache.Set("127.0.0.1", 84);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
 
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
 
             Assert.False(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.False(context.Response.Headers.ContainsKey(Constants.LimitHeader));
@@ -197,22 +177,17 @@ public class SlowDownMiddlewareTests
         try
         {
             var flag = false;
+            
+            _options.DelayAfter = 1;
+            _options.FakeDelay = true;
+            _options.OnLimitReached = _ => flag = true;
 
-            SlowDownOptions.CurrentOptions = new()
-            {
-                Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 1,
-                FakeDelay = true,
-                OnLimitReached = _ => flag = true
-            };
-
-            await CacheHelper.Set("127.0.0.1", 5);
+            await _cache.Set("127.0.0.1", 5);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
             
             Assert.False(flag);
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
             Assert.True(flag);
         }
         finally
@@ -233,29 +208,24 @@ public class SlowDownMiddlewareTests
             const int delayAfter = 100;
             const int expectedDelay = (startingRequestCount - delayAfter) * delay + delay;
             
-            SlowDownOptions.CurrentOptions = new()
-            {
-                AddHeaders = true,
-                Cache = UnitTestHelperMethods.CreateCache(),
-                Delay = delay,
-                DelayAfter = delayAfter,
-                FakeDelay = true,
-                TimeWindow = 1000
-            };
+            _options.AddHeaders = true;
+            _options.Delay = delay;
+            _options.DelayAfter = delayAfter;
+            _options.FakeDelay = true;
+            _options.TimeWindow = 1000;
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
             
             // Set the current number of requests to 300. Expiration will be `TimeWindow`
             // from now.
-            await CacheHelper.Set("127.0.0.1", startingRequestCount);
+            await _cache.Set("127.0.0.1", startingRequestCount);
             
             // Wait one second after the window is set to expire. Between the added 1000ms
             // and processing time for the above, we should be past the expiration time.
-            await Task.Delay(SlowDownOptions.CurrentOptions.TimeWindow + 1000);
+            await Task.Delay(_options.TimeWindow + 1000);
 
             // Trigger a single request, and make sure that things got reset.
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
 
             Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
@@ -278,21 +248,16 @@ public class SlowDownMiddlewareTests
         
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 6,
-                FakeDelay = true,
-                SkipFailedRequests = true
-            };
+            _options.DelayAfter = 6;
+            _options.FakeDelay = true;
+            _options.SkipFailedRequests = true;
 
-            await CacheHelper.Set("127.0.0.1", 5);
+            await _cache.Set("127.0.0.1", 5);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
             
             context.Response.StatusCode = 404;
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
 
             Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
@@ -315,21 +280,16 @@ public class SlowDownMiddlewareTests
         
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 6,
-                FakeDelay = true,
-                SkipSuccessfulRequests = true
-            };
+            _options.DelayAfter = 6;
+            _options.FakeDelay = true;
+            _options.SkipSuccessfulRequests = true;
 
-            await CacheHelper.Set("127.0.0.1", 5);
+            await _cache.Set("127.0.0.1", 5);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
             
             context.Response.StatusCode = 200;
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
 
             Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
@@ -352,20 +312,15 @@ public class SlowDownMiddlewareTests
         
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                Cache = UnitTestHelperMethods.CreateCache(),
-                DelayAfter = 6,
-                FakeDelay = true,
-                Skip = _ => true
-            };
+            _options.DelayAfter = 6;
+            _options.FakeDelay = true;
+            _options.Skip = _ => true;
 
-            await CacheHelper.Set("127.0.0.1", 5);
+            await _cache.Set("127.0.0.1", 5);
 
             var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
             
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
 
             Assert.True(context.Response.Headers.ContainsKey(Constants.DelayHeader));
             Assert.True(context.Response.Headers.ContainsKey(Constants.LimitHeader));
@@ -389,9 +344,8 @@ public class SlowDownMiddlewareTests
         try
         {
             var context = UnitTestHelperMethods.CreateHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
 
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
         }
         finally
         {
@@ -406,15 +360,11 @@ public class SlowDownMiddlewareTests
 
         try
         {
-            SlowDownOptions.CurrentOptions = new()
-            {
-                SlowDownEnabled = false
-            };
+            _options.SlowDownEnabled = false;
             
             var context = UnitTestHelperMethods.CreateHttpContext();
-            var middleware = UnitTestHelperMethods.CreateSlowDownMiddleware();
 
-            await middleware.InvokeAsync(context);
+            await _middleware.InvokeAsync(context);
         }
         finally
         {

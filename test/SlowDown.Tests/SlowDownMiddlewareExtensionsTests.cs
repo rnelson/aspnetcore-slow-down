@@ -5,9 +5,11 @@ using Nearform.AspNetCore.SlowDown;
 
 namespace SlowDown.Tests;
 
-public class SlowDownMiddlewareExtensionsTests
+public class SlowDownMiddlewareExtensionsTests(SlowDownOptions options)
+    : IClassFixture<SlowDownOptions>
 {
     private static readonly SemaphoreSlim Semaphore = new(1,1);
+    private readonly SlowDownOptions _options = options ?? throw new ArgumentNullException(nameof(options));
     
     [Fact]
     public async Task MiddlewareExtensions_Work()
@@ -18,11 +20,7 @@ public class SlowDownMiddlewareExtensionsTests
         {
             var builder = WebApplication.CreateBuilder();
             var services = builder.Services;
-
-            services.AddSlowDown(config =>
-            {
-                config.Cache = UnitTestHelperMethods.CreateCache();
-            });
+            services.AddSlowDown();
 
             await using var app = builder.Build();
 
@@ -55,15 +53,15 @@ public class SlowDownMiddlewareExtensionsTests
             app.UseRouting();
             app.UseSlowDown();
 
-            Assert.False(SlowDownOptions.CurrentOptions.SlowDownEnabled);
-            Assert.Equal(16, SlowDownOptions.CurrentOptions.Delay);
-            Assert.Equal(32, SlowDownOptions.CurrentOptions.DelayAfter);
-            Assert.Equal(64, SlowDownOptions.CurrentOptions.MaxDelay);
-            Assert.Equal(128, SlowDownOptions.CurrentOptions.TimeWindow);
-            Assert.False(SlowDownOptions.CurrentOptions.AddHeaders);
-            Assert.True(SlowDownOptions.CurrentOptions.SkipFailedRequests);
-            Assert.True(SlowDownOptions.CurrentOptions.SkipSuccessfulRequests);
-            Assert.Equal(256, SlowDownOptions.CurrentOptions.CacheTimeout);
+            Assert.False(_options.SlowDownEnabled);
+            Assert.Equal(16, _options.Delay);
+            Assert.Equal(32, _options.DelayAfter);
+            Assert.Equal(64, _options.MaxDelay);
+            Assert.Equal(128, _options.TimeWindow);
+            Assert.False(_options.AddHeaders);
+            Assert.True(_options.SkipFailedRequests);
+            Assert.True(_options.SkipSuccessfulRequests);
+            Assert.Equal(256, _options.CacheTimeout);
         }
         finally
         {

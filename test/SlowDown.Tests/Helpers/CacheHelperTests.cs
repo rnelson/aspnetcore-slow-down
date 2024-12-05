@@ -1,10 +1,15 @@
-﻿using Nearform.AspNetCore.SlowDown;
+﻿
+using Nearform.AspNetCore.SlowDown;
 using Nearform.AspNetCore.SlowDown.Helpers;
 
 namespace SlowDown.Tests.Helpers;
 
-public class CacheHelperTests
+public class CacheHelperTests(SlowDownOptions options, CacheHelper cacheHelper) : IClassFixture<SlowDownOptions>,
+    IClassFixture<CacheHelper>
 {
+    private readonly SlowDownOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly CacheHelper _cache = cacheHelper ?? throw new ArgumentNullException(nameof(cacheHelper));
+
     [Fact]
     public async Task GetHttpRequest_CreatesNewItemInCache()
     {
@@ -12,9 +17,9 @@ public class CacheHelperTests
 
         try
         {
-            var (_, request) = UnitTestHelperMethods.Setup();
+            var request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
         
-            var (count, _) = await CacheHelper.Get(request);
+            var count = await _cache.Get(request);
             Assert.Equal(0, count);
         }
         finally
@@ -31,13 +36,13 @@ public class CacheHelperTests
         try
         {
             const int expected = 8;
-            var (_, request) = UnitTestHelperMethods.Setup();
+            var request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
         
-            var (count, _) = await CacheHelper.Get(request);
+            var count = await _cache.Get(request);
             Assert.Equal(0, count);
         
-            await CacheHelper.Set(request, expected);
-            (count, _) = await CacheHelper.Get(request);
+            await _cache.Set(request, expected);
+            count = await _cache.Get(request);
             Assert.Equal(expected, count);
         }
         finally
@@ -46,26 +51,23 @@ public class CacheHelperTests
         }
     }
     
-    [Fact]
-    public async Task GetHttpRequest_GetsNullWithNoCache()
-    {
-        await CacheSemaphore.Semaphore.WaitAsync();
-
-        try
-        {
-            const int expected = 8;
-            var (_, request) = UnitTestHelperMethods.Setup();
-            SlowDownOptions.CurrentOptions.Cache = null;
-        
-            var (count, ttl) = await CacheHelper.Get(request);
-            Assert.Equal(0, count);
-            Assert.Equal(-1, ttl);
-        }
-        finally
-        {
-            CacheSemaphore.Semaphore.Release();
-        }
-    }
+    // [Fact]
+    // public async Task GetHttpRequest_GetsNullWithNoCache()
+    // {
+    //     await CacheSemaphore.Semaphore.WaitAsync();
+    //
+    //     try
+    //     {
+    //         var (_, request) = UnitTestHelperMethods.Setup();
+    //     
+    //         var count = await _cache.Get(request);
+    //         Assert.Equal(0, count);
+    //     }
+    //     finally
+    //     {
+    //         CacheSemaphore.Semaphore.Release();
+    //     }
+    // }
     
     [Fact]
     public async Task GetHttpRequest_SetUpdatesItemInCache()
@@ -75,13 +77,13 @@ public class CacheHelperTests
         try
         {
             const int expected = 5;
-            var (_, request) = UnitTestHelperMethods.Setup();
+            var request = UnitTestHelperMethods.CreateXForwardedForHttpRequest();
         
-            var (count, _) = await CacheHelper.Get(request);
+            var count = await _cache.Get(request);
             Assert.Equal(0, count);
         
-            await CacheHelper.Set(request, expected);
-            (count, _) = await CacheHelper.Get(request);
+            await _cache.Set(request, expected);
+            count = await _cache.Get(request);
             Assert.Equal(expected, count);
         }
         finally

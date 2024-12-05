@@ -18,7 +18,6 @@ public class SlowDownOptionsTests
         Assert.Equal(5, options.DelayAfter);
         Assert.Equal(int.MaxValue, options.MaxDelay);
         Assert.Equal(30000, options.TimeWindow);
-        Assert.Null(options.Cache);
         Assert.True(options.AddHeaders);
         Assert.NotNull(options.KeyGenerator);
         Assert.Null(options.OnLimitReached);
@@ -76,20 +75,20 @@ public class SlowDownOptionsTests
         Assert.Equal(expected, key);
     }
 
-    [Fact]
-    public void Properties_CurrentOptions_Works()
-    {
-        const int initial = 5;
-        const int expected = 42;
-
-        SlowDownOptions.CurrentOptions = new();
-        Assert.Equal(initial, SlowDownOptions.CurrentOptions.DelayAfter);
-        
-        var newOptions = new SlowDownOptions { DelayAfter = expected };
-        SlowDownOptions.CurrentOptions = newOptions;
-        
-        Assert.Equal(expected, SlowDownOptions.CurrentOptions.DelayAfter);
-    }
+    // [Fact]
+    // public void Properties_CurrentOptions_Works()
+    // {
+    //     const int initial = 5;
+    //     const int expected = 42;
+    //
+    //     SlowDownOptions.CurrentOptions = new();
+    //     Assert.Equal(initial, SlowDownOptions.CurrentOptions.DelayAfter);
+    //     
+    //     var newOptions = new SlowDownOptions { DelayAfter = expected };
+    //     SlowDownOptions.CurrentOptions = newOptions;
+    //     
+    //     Assert.Equal(expected, SlowDownOptions.CurrentOptions.DelayAfter);
+    // }
 
     [Fact]
     public void Properties_KeyGenerator_Works()
@@ -121,7 +120,6 @@ public class SlowDownOptionsTests
             DelayAfter = 1,
             MaxDelay = 1,
             TimeWindow = 1,
-            Cache = null!,
             AddHeaders = true,
             OnLimitReached = null,
             SkipFailedRequests = true,
@@ -135,7 +133,6 @@ public class SlowDownOptionsTests
         Assert.Equal(1, options.DelayAfter);
         Assert.Equal(1, options.MaxDelay);
         Assert.Equal(1, options.TimeWindow);
-        Assert.Null(options.Cache);
         Assert.True(options.AddHeaders);
         Assert.NotNull(options.KeyGenerator);
         Assert.Null(options.OnLimitReached);
@@ -151,7 +148,6 @@ public class SlowDownOptionsTests
             DelayAfter = 2,
             MaxDelay = 2,
             TimeWindow = 2,
-            Cache = null!,
             AddHeaders = false,
             OnLimitReached = null,
             SkipFailedRequests = false,
@@ -165,7 +161,6 @@ public class SlowDownOptionsTests
         Assert.Equal(2, options.DelayAfter);
         Assert.Equal(2, options.MaxDelay);
         Assert.Equal(2, options.TimeWindow);
-        Assert.Null(options.Cache);
         Assert.False(options.AddHeaders);
         Assert.NotNull(options.KeyGenerator);
         Assert.Null(options.OnLimitReached);
