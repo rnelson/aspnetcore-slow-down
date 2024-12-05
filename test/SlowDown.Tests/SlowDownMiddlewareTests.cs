@@ -387,7 +387,7 @@ public class SlowDownMiddlewareTests
                 {
                     endpoints.MapGet("/err", context =>
                     {
-                        context.Response.StatusCode = 404;
+                        context.Response.StatusCode = 500;
                         return Task.CompletedTask;
                     });
                 });

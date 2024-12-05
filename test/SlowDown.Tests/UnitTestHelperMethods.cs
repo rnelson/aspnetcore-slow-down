@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -75,6 +76,18 @@ internal static class UnitTestHelperMethods
                     .Configure(app =>
                     {
                         app.UseRouting();
+                        
+                        // Ensure requests to /err throw a 500 back.
+                        app.UseExceptionHandler("/err");
+                        app.UseRouting();
+                        app.Use(async (context, next) =>
+                        {
+                            if (context.Request.Path.StartsWithSegments("/err"))
+                                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                            
+                            await next();
+                        });
+                        
                         app.UseSlowDown();
                         appAction?.Invoke(app);
                     });
