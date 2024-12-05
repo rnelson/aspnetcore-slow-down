@@ -295,9 +295,6 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Grab the configured options.
-            var options = host.Services.GetRequiredService<SlowDownOptions>();
-            
             // Set the current number of requests to 10. Calling InvokeAsync()
             // will increment the count to 11 before doing any math.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
@@ -343,9 +340,6 @@ public class SlowDownMiddlewareTests
             // Start the test server.
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
-            
-            // Grab the configured options.
-            var options = host.Services.GetRequiredService<SlowDownOptions>();
             
             // Set the current number of requests to 10. Calling InvokeAsync()
             // will increment the count to 11 before doing any math.

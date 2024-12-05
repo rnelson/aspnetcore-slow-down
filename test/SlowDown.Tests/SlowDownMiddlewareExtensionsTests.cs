@@ -7,11 +7,9 @@ using Xunit.DependencyInjection;
 namespace SlowDown.Tests;
 
 [Startup(typeof(Startup))]
-public class SlowDownMiddlewareExtensionsTests(SlowDownOptions options)
-    : IClassFixture<SlowDownOptions>
+public class SlowDownMiddlewareExtensionsTests
 {
     private static readonly SemaphoreSlim Semaphore = new(1,1);
-    private readonly SlowDownOptions _options = options ?? throw new ArgumentNullException(nameof(options));
     
     [Fact]
     public async Task MiddlewareExtensions_Work()
