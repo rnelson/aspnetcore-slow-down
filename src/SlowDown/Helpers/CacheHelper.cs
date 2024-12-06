@@ -7,6 +7,7 @@ namespace Nearform.AspNetCore.SlowDown.Helpers;
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "HeapView.ObjectAllocation")]
 [SuppressMessage("ReSharper", "HeapView.ObjectAllocation.Evident")]
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public class CacheHelper(SlowDownOptions options, HybridCache cache)
 {
     private readonly SlowDownOptions _options = options ?? throw new ArgumentNullException(nameof(options));
