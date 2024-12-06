@@ -48,12 +48,6 @@ public class SlowDownOptions
     /// </summary>
     public int TimeWindow { get; set; } = 30000;
 
-    // /// <summary>
-    // /// A <see cref="HybridCache"/> instance to use for caching clients and
-    // /// their request counts.
-    // /// </summary>
-    // public HybridCache Cache { get; set; } = _cache;
-
     /// <summary>
     /// Flag to add custom headers (<c>X-Slow-Down-Limit</c>, <c>X-Slow-Down-Remaining</c>,
     /// <c>X-Slow-Down-Delay</c>) for all server responses.
