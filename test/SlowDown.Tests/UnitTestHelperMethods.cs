@@ -101,11 +101,10 @@ internal static class UnitTestHelperMethods
         return context;
     }
     
-    public static HttpRequest CreateXForwardedForHttpRequest()
+    public static HttpRequest CreateXForwardedForHttpRequest(string ip = "4.2.2.4")
     {
-        const string expected = "4.2.2.4";
         var context = new DefaultHttpContext();
-        context.Request.Headers["X-Forwarded-For"] = expected;
+        context.Request.Headers["X-Forwarded-For"] = ip;
         
         return context.Request;
     }
