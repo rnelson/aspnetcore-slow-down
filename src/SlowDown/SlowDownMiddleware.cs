@@ -97,7 +97,7 @@ public class SlowDownMiddleware(
 
     private int CalculateDelay(int requestCount)
     {
-        if (_options.DelayAfter == 0 || _options.Delay == 0 || _options.TimeWindow == 0 || _options.MaxDelay == 0)
+        if (_options.DelayAfter == 0 || _options.Delay == 0 || _options.MaxDelay == 0)
             return 0;
 
         if (requestCount <= _options.DelayAfter)
