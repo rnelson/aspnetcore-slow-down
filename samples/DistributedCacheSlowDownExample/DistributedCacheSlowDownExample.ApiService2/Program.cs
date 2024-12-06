@@ -12,7 +12,7 @@ builder.AddServiceDefaults();
 
 // Use the Aspire Redis connection
 builder.AddRedisClient(connectionName: "cache");
-builder.AddRedisDistributedCache("cache");
+builder.AddRedisDistributedCache(connectionName: "cache");
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
