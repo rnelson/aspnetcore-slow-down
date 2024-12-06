@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAspireSharedProject>true</IsAspireSharedProject>
+    <Authors>Ross Nelson</Authors>
+    <Company>Nearform Ltd.</Company>
+    <Copyright>Copyright (C) 2024 Nearform Ltd.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
