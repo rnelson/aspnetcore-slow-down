@@ -14,21 +14,6 @@ namespace SlowDown.Tests;
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
 public class SlowDownMiddlewareTests
 {
-    // [Fact]
-    // public async Task Constructor_Works()
-    // {
-    //     await CacheSemaphore.Semaphore.WaitAsync();
-    //
-    //     try
-    //     {
-    //         _ = UnitTestHelperMethods.CreateSlowDownMiddleware();
-    //     }
-    //     finally
-    //     {
-    //         CacheSemaphore.Semaphore.Release();
-    //     }
-    // }
-
     [Fact]
     public async Task HandleSlowDown_AddedCorrectHeadersAfterLimit()
     {

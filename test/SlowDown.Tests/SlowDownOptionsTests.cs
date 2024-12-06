@@ -78,21 +78,6 @@ public class SlowDownOptionsTests
         Assert.Equal(expected, key);
     }
 
-    // [Fact]
-    // public void Properties_CurrentOptions_Works()
-    // {
-    //     const int initial = 5;
-    //     const int expected = 42;
-    //
-    //     SlowDownOptions.CurrentOptions = new();
-    //     Assert.Equal(initial, SlowDownOptions.CurrentOptions.DelayAfter);
-    //     
-    //     var newOptions = new SlowDownOptions { DelayAfter = expected };
-    //     SlowDownOptions.CurrentOptions = newOptions;
-    //     
-    //     Assert.Equal(expected, SlowDownOptions.CurrentOptions.DelayAfter);
-    // }
-
     [Fact]
     public void Properties_KeyGenerator_Works()
     {
