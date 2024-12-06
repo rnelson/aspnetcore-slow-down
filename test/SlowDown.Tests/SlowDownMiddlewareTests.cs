@@ -31,8 +31,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 10);
 
@@ -74,8 +73,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 10);
 
@@ -101,6 +99,42 @@ public class SlowDownMiddlewareTests
     }
 
     [Fact]
+    public async Task HandleSlowDown_CalculateDelayReturnsZeroWhenTimeWindowIsZero()
+    {
+        await CacheSemaphore.Semaphore.WaitAsync();
+        
+        try
+        {
+            var builder = UnitTestHelperMethods.CreateWebHostBuilder(options =>
+            {
+                options.MaxDelay = 0;
+            });
+            
+            // Start the test server.
+            var host = await builder.StartAsync();
+            var client = host.GetTestClient();
+            
+            // Set a current count for the user.
+            var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
+            await cache.Set("127.0.0.1", 500);
+
+            // Create an HttpRequestMessage to send to the test server.
+            var context = UnitTestHelperMethods.CreateXForwardedForHttpContext();
+            var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
+            
+            // Send the request.
+            var response = await client.SendAsync(message);
+
+            Assert.True(response.Headers.Contains(Constants.DelayHeader));
+            Assert.Equal(0, int.Parse(response.Headers.GetValues(Constants.DelayHeader).First()));
+        }
+        finally
+        {
+            CacheSemaphore.Semaphore.Release();
+        }
+    }
+
+    [Fact]
     public async Task HandleSlowDown_DelayNotAddedUnnecessarily()
     {
         await CacheSemaphore.Semaphore.WaitAsync();
@@ -116,8 +150,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 9);
 
@@ -154,8 +187,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 11);
 
@@ -192,8 +224,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 84);
 
@@ -234,8 +265,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 5);
 
@@ -280,8 +310,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", startingRequestCount);
 
@@ -326,8 +355,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 300);
 
@@ -376,8 +404,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 5);
 
@@ -421,8 +448,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 5);
 
@@ -466,8 +492,7 @@ public class SlowDownMiddlewareTests
             var host = await builder.StartAsync();
             var client = host.GetTestClient();
             
-            // Set the current number of requests to 10. Calling InvokeAsync()
-            // will increment the count to 11 before doing any math.
+            // Set a current count for the user.
             var cache = host.GetTestServer().Services.GetRequiredService<CacheHelper>();
             await cache.Set("127.0.0.1", 5);
 
