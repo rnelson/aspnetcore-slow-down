@@ -1,33 +1,27 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Nearform.AspNetCore.SlowDown.Helpers;
 
 namespace Nearform.AspNetCore.SlowDown;
 
-public class SlowDownMiddleware
+[SuppressMessage("ReSharper", "HeapView.ObjectAllocation")]
+public class SlowDownMiddleware(
+    RequestDelegate next,
+    ILogger<SlowDownMiddleware> logger,
+    SlowDownOptions options,
+    CacheHelper cacheHelper)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<SlowDownMiddleware> _logger;
+    private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
+    private readonly ILogger<SlowDownMiddleware> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly SlowDownOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly CacheHelper _cacheHelper = cacheHelper ?? throw new ArgumentNullException(nameof(cacheHelper));
 
-    public SlowDownMiddleware(RequestDelegate next, ILogger<SlowDownMiddleware> logger,
-        IServiceProvider serviceProvider)
-    {
-        _next = next ?? throw new ArgumentNullException(nameof(next));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        var services = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-
-        // We require HybridCache for caching. Make sure the user added it.
-        SlowDownOptions.CurrentOptions.Cache ??= 
-            (services.GetRequiredService(typeof(HybridCache)) as HybridCache)!;
-    }
-    
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            if (SlowDownOptions.CurrentOptions.SlowDownEnabled)
+            if (_options.SlowDownEnabled)
             {
                 await HandleSlowDown(context);
                 await HandleSkipConditions(context);
@@ -43,45 +37,43 @@ public class SlowDownMiddleware
         }
     }
 
-    private static async Task HandleSkipConditions(HttpContext context)
+    private async Task HandleSkipConditions(HttpContext context)
     {
-        var opt = SlowDownOptions.CurrentOptions;
         var ip = await AspNetCoreHelper.GetClientIp(context.Request);
         
-        var shouldSkip = SlowDownOptions.CurrentOptions.Skip?.Invoke(context.Request) ?? false;
+        var shouldSkip = _options.Skip?.Invoke(context.Request) ?? false;
 
-        if ((opt.SkipFailedRequests && context.Response.StatusCode >= 400) ||
-            (opt.SkipSuccessfulRequests && context.Response.StatusCode < 400) ||
+        if ((_options.SkipFailedRequests && context.Response.StatusCode >= 400) ||
+            (_options.SkipSuccessfulRequests && context.Response.StatusCode < 400) ||
             shouldSkip)
         {
             await ChangeCount(ip, -1);
 
-            if (opt.AddHeaders)
+            if (_options.AddHeaders)
             {
                 var delay = int.Parse(context.Response.Headers[Constants.DelayHeader].ToString());
                 var remaining = int.Parse(context.Response.Headers[Constants.DelayHeader].ToString());
-                AddHeaders(context, delay, opt.DelayAfter, remaining + 1);
+                AddHeaders(context, delay, _options.DelayAfter, remaining + 1);
             }
         }
     }
 
-    private static async Task HandleSlowDown(HttpContext context)
+    private async Task HandleSlowDown(HttpContext context)
     {
-        var opt = SlowDownOptions.CurrentOptions;
         var ip = await AspNetCoreHelper.GetClientIp(context.Request);
-        var (newCount, _) = await ChangeCount(ip);
+        var newCount = await ChangeCount(ip);
 
         var delay = CalculateDelay(newCount);
-        var remaining = Math.Max(opt.DelayAfter - newCount, 0);
+        var remaining = Math.Max(_options.DelayAfter - newCount, 0);
         
-        if (opt.AddHeaders)
-            AddHeaders(context, delay, opt.DelayAfter, remaining);
+        if (_options.AddHeaders)
+            AddHeaders(context, delay, _options.DelayAfter, remaining);
 
         if (delay > 0)
         {
-            SlowDownOptions.CurrentOptions.OnLimitReached?.Invoke(context.Request);
+            _options.OnLimitReached?.Invoke(context.Request);
             
-            if (!opt.FakeDelay)
+            if (!_options.FakeDelay)
                 await Task.Delay(delay);
         }
     }
@@ -93,30 +85,25 @@ public class SlowDownMiddleware
         context.Response.Headers[Constants.RemainingHeader] = remaining.ToString();
     }
 
-    private static async Task<(int, int)> ChangeCount(string ip, int delta = 1)
+    private async Task<int> ChangeCount(string ip, int delta = 1)
     {
-        var now = DateTime.UtcNow.Millisecond;
-        var (currentCount, addedTimestamp) = await CacheHelper.Get(ip);
-        
+        var currentCount = await _cacheHelper.Get(ip);
         var newCount = currentCount + delta;
-        var ttl = SlowDownOptions.CurrentOptions.TimeWindow - now - addedTimestamp;
         
-        await CacheHelper.Set(ip, newCount);
+        await _cacheHelper.Set(ip, newCount);
         
-        return (newCount, ttl);
+        return newCount;
     }
 
-    private static int CalculateDelay(int requestCount)
+    private int CalculateDelay(int requestCount)
     {
-        var opt = SlowDownOptions.CurrentOptions;
-
-        if (opt.DelayAfter == 0 || opt.Delay == 0 || opt.TimeWindow == 0 || opt.MaxDelay == 0)
+        if (_options.DelayAfter == 0 || _options.Delay == 0 || _options.MaxDelay == 0)
             return 0;
 
-        if (requestCount <= opt.DelayAfter)
+        if (requestCount <= _options.DelayAfter)
             return 0;
 
-        var remaining = Math.Max(requestCount - opt.DelayAfter, 0);
-        return Math.Min(remaining * opt.Delay, opt.MaxDelay);
+        var remaining = Math.Max(requestCount - _options.DelayAfter, 0);
+        return Math.Min(remaining * _options.Delay, _options.MaxDelay);
     }
 }

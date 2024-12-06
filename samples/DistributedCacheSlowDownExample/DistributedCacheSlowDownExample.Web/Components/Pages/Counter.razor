@@ -1,0 +1,24 @@
+﻿@page "/counter"
+@rendermode InteractiveServer
+@* ReSharper disable HeapView.DelegateAllocation *@
+@* ReSharper disable HeapView.BoxingAllocation *@
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @_currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int _currentCount;
+
+    private void IncrementCount()
+    {
+        _currentCount++;
+    }
+}
+
+@* ReSharper restore HeapView.BoxingAllocation *@
+@* ReSharper restore HeapView.DelegateAllocation *@

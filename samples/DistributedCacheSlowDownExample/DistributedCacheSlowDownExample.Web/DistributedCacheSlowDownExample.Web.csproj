@@ -2,15 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <Authors>Ross Nelson</Authors>
     <Company>Nearform Ltd.</Company>
     <Copyright>Copyright (C) 2024 Nearform Ltd.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SlowDown\Nearform.AspNetCore.SlowDown.csproj" />
+    <ProjectReference Include="..\DistributedCacheSlowDownExample.ServiceDefaults\DistributedCacheSlowDownExample.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.0.0" />
   </ItemGroup>
 
 </Project>
