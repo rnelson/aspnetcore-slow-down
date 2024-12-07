@@ -1,6 +1,6 @@
 # SlowDown Middleware
 
-![Build status](https://github.com/nearform/aspnetcore-slow-down/actions/workflows/dotnet.yml/badge.svg) ![License](https://img.shields.io/github/license/nearform/aspnetcore-slow-down)
+![Build status](https://github.com/rnelson/aspnetcore-slow-down/actions/workflows/dotnet.yml/badge.svg) ![License](https://img.shields.io/github/license/rnelson/aspnetcore-slow-down)
 
 A slow-down middleware for ASP.NET Core.
 
@@ -9,7 +9,7 @@ A slow-down middleware for ASP.NET Core.
 **This package is not yet available on NuGet. When it is, you will be able to install the package with the following:**
 
 ```bash
-dotnet add package Nearform.AspNetCore.SlowDown
+dotnet add package Libexec.AspNetCore.SlowDown
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ dotnet add package Nearform.AspNetCore.SlowDown
 ### Adding the middleware
 
 ```csharp
-using Nearform.AspNetCore.SlowDown;
+using Libexec.AspNetCore.SlowDown;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -138,4 +138,4 @@ Delay remains the same because the value of `MaxDelay` option is `100000`.
 
 ## License
 
-`Nearform.AspNetCore.SlowDown` is released under the MIT License.
+`Libexec.AspNetCore.SlowDown` is released under the MIT license. Contains code written by Nearform Ltd. released under the MIT license.

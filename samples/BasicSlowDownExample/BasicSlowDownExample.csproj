@@ -5,12 +5,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Authors>Ross Nelson</Authors>
-    <Company>Nearform Ltd.</Company>
-    <Copyright>Copyright (C) 2024 Nearform Ltd.</Copyright>
+    <Copyright>Copyright (C) 2024 Nearform Ltd; Copyright (C) 2024 Ross Nelson.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SlowDown\Nearform.AspNetCore.SlowDown.csproj" />
+    <ProjectReference Include="..\..\src\SlowDown\Libexec.AspNetCore.SlowDown.csproj" />
   </ItemGroup>
 
 </Project>

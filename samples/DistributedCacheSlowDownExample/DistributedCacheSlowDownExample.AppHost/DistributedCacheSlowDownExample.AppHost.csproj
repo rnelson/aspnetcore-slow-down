@@ -6,8 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Authors>Ross Nelson</Authors>
-    <Company>Nearform Ltd.</Company>
-    <Copyright>Copyright (C) 2024 Nearform Ltd.</Copyright>
+    <Copyright>Copyright (C) 2024 Nearform Ltd; Copyright (C) 2024 Ross Nelson.</Copyright>
     <IsAspireHost>true</IsAspireHost>
     <UserSecretsId>5aa6c716-9fce-49bb-a0d4-fa4aacc36b22</UserSecretsId>
   </PropertyGroup>

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nearform.AspNetCore.SlowDown", "src\SlowDown\Nearform.AspNetCore.SlowDown.csproj", "{5B180A40-3156-47FA-B1D0-8919D1411704}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libexec.AspNetCore.SlowDown", "src\SlowDown\Libexec.AspNetCore.SlowDown.csproj", "{5B180A40-3156-47FA-B1D0-8919D1411704}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowDown.Tests", "test\SlowDown.Tests\SlowDown.Tests.csproj", "{C8073413-384F-48A2-82D5-713A15E9A88F}"
 EndProject

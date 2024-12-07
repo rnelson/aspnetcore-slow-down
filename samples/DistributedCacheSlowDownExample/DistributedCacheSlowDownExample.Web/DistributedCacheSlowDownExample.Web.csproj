@@ -5,8 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Authors>Ross Nelson</Authors>
-    <Company>Nearform Ltd.</Company>
-    <Copyright>Copyright (C) 2024 Nearform Ltd.</Copyright>
+    <Copyright>Copyright (C) 2024 Nearform Ltd; Copyright (C) 2024 Ross Nelson.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

@@ -12,7 +12,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCacheSlowDownExa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCacheSlowDownExample.ApiService2", "DistributedCacheSlowDownExample.ApiService2\DistributedCacheSlowDownExample.ApiService2.csproj", "{BC9709DF-EAAF-4B49-A411-98D4C4F74267}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nearform.AspNetCore.SlowDown", "..\..\src\SlowDown\Nearform.AspNetCore.SlowDown.csproj", "{1F8C1ED5-FC92-4DFD-93A6-955310A220D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libexec.AspNetCore.SlowDown", "..\..\src\SlowDown\Libexec.AspNetCore.SlowDown.csproj", "{1F8C1ED5-FC92-4DFD-93A6-955310A220D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

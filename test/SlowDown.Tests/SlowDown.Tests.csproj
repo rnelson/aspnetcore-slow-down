@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SlowDown\Nearform.AspNetCore.SlowDown.csproj" />
+    <ProjectReference Include="..\..\src\SlowDown\Libexec.AspNetCore.SlowDown.csproj" />
   </ItemGroup>
 
   <ItemGroup>
