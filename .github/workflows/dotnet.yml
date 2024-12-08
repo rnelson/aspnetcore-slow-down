@@ -23,8 +23,24 @@ jobs:
           8.0.x
           9.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore src/SlowDown/Libexec.AspNetCore.SlowDown.csproj
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build src/SlowDown/Libexec.AspNetCore.SlowDown.csproj --no-restore
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          9.0.x
+    - name: Restore dependencies
+      run: dotnet restore test/SlowDown.Tests/SlowDown.Tests.csproj
+    - name: Build
+      run: dotnet build test/SlowDown.Tests/SlowDown.Tests.csproj --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
