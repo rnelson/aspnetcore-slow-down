@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Authors>Ross Nelson</Authors>
-    <Copyright>Copyright (C) 2024 Nearform Ltd; Copyright (C) 2024 Ross Nelson.</Copyright>
+    <Copyright>Copyright (C) 2024 Nearform Ltd; Copyright (C) 2024-2026 Ross Nelson.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

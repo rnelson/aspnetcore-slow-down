@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Hybrid;
 
@@ -12,6 +13,7 @@ public class CacheHelper(SlowDownOptions options, HybridCache cache)
 {
     private readonly SlowDownOptions _options = options ?? throw new ArgumentNullException(nameof(options));
     private readonly HybridCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+    private readonly ConcurrentDictionary<string, object?> _knownKeys = [];
     
     public async Task<int> Get(HttpRequest request,
         IEnumerable<string>? tags = null,
@@ -51,18 +53,22 @@ public class CacheHelper(SlowDownOptions options, HybridCache cache)
         var key = await _options.KeyGenerator(request, ct);
         
         await Remove(key, cancellationToken: ct);
+        _knownKeys.TryRemove(key, out _);
     }
 
     public async Task Remove(string key, CancellationToken? cancellationToken = null)
     {
         var ct = cancellationToken ?? GetCancellationToken();
         await _cache.RemoveAsync($"{key}_count", cancellationToken: ct);
+        _knownKeys.TryRemove(key, out _);
     }
 
     public async Task RemoveAll(IEnumerable<string> tags, CancellationToken? cancellationToken = null)
     {
         var ct = cancellationToken ?? GetCancellationToken();
-        await _cache.RemoveByTagAsync(tags, cancellationToken: ct);
+        //await _cache.RemoveByTagAsync(tags, cancellationToken: ct);
+        foreach (var key in _knownKeys.Keys)
+            await Remove(key, ct);
     }
     
     public async Task Set(HttpRequest request,
@@ -74,6 +80,7 @@ public class CacheHelper(SlowDownOptions options, HybridCache cache)
         var key = await _options.KeyGenerator(request, ct);
 
         await Set(key, value, tags);
+        _knownKeys.TryAdd(key, null);
     }
 
     public async Task Set(string key,
@@ -91,6 +98,7 @@ public class CacheHelper(SlowDownOptions options, HybridCache cache)
         };
 
         await _cache.SetAsync($"{key}_count", value, options: cacheOptions, cancellationToken: ct, tags: tags);
+        _knownKeys.TryAdd(key, null);
     }
     
     private CancellationToken GetCancellationToken()

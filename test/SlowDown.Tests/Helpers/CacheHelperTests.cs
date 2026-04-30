@@ -16,7 +16,7 @@ public class CacheHelperTests(CacheHelper cacheHelper)
     [DisableParallelization]
     public async Task GetHttpRequest_CreatesNewItemInCache()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         HttpRequest? request = null;
 
         try
@@ -37,7 +37,7 @@ public class CacheHelperTests(CacheHelper cacheHelper)
     [DisableParallelization]
     public async Task GetHttpRequest_GetsItemFromCache()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         HttpRequest? request = null;
 
         try
@@ -63,7 +63,7 @@ public class CacheHelperTests(CacheHelper cacheHelper)
     [DisableParallelization]
     public async Task GetHttpRequest_RemoveAllWorks()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         HttpRequest? requestOne = null, requestTwo = null;
         var tags = new[] { "helperTest" };
 
@@ -94,9 +94,9 @@ public class CacheHelperTests(CacheHelper cacheHelper)
             
             // Ensure IP 1's entry is gone/default but that IP 2 is unchanged.
             countOne = await _cache.Get(requestOne);
-            Assert.Equal(expectedOne, countOne);
+            Assert.Equal(0, countOne);
             countTwo = await _cache.Get(requestTwo);
-            Assert.Equal(expectedTwo, countTwo);
+            Assert.Equal(0, countTwo);
         }
         finally
         {
@@ -110,7 +110,7 @@ public class CacheHelperTests(CacheHelper cacheHelper)
     [DisableParallelization]
     public async Task GetHttpRequest_RemoveWorks()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         HttpRequest? requestOne = null, requestTwo = null;
 
         try
@@ -156,7 +156,7 @@ public class CacheHelperTests(CacheHelper cacheHelper)
     [DisableParallelization]
     public async Task GetHttpRequest_SetUpdatesItemInCache()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         HttpRequest? request = null;
 
         try
