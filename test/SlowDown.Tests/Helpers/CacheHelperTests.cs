@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Nearform.AspNetCore.SlowDown.Helpers;
+﻿using Libexec.AspNetCore.SlowDown.Helpers;
+using Microsoft.AspNetCore.Http;
 using Xunit.DependencyInjection;
 
 namespace SlowDown.Tests.Helpers;
@@ -89,8 +89,8 @@ public class CacheHelperTests(CacheHelper cacheHelper)
             var countTwo = await _cache.Get(requestTwo, tags: _tags);
             Assert.Equal(expectedTwo, countTwo);
             
-            // Remove everything with the method scope tags.
-            await _cache.RemoveAll(tags);
+            // Remove everything.
+            await _cache.RemoveAll();
             
             // Ensure IP 1's entry is gone/default but that IP 2 is unchanged.
             countOne = await _cache.Get(requestOne);

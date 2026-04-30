@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Libexec.AspNetCore.SlowDown.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Nearform.AspNetCore.SlowDown.Helpers;
 
-namespace Nearform.AspNetCore.SlowDown;
+namespace Libexec.AspNetCore.SlowDown;
 
 [SuppressMessage("ReSharper", "HeapView.ObjectAllocation")]
 public class SlowDownMiddleware(

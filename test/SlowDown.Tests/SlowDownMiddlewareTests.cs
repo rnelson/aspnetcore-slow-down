@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Libexec.AspNetCore.SlowDown;
+using Libexec.AspNetCore.SlowDown.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Nearform.AspNetCore.SlowDown;
-using Nearform.AspNetCore.SlowDown.Helpers;
 using Xunit.DependencyInjection;
 
 namespace SlowDown.Tests;
@@ -17,7 +17,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_AddedCorrectHeadersAfterLimit()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -28,7 +28,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(cancellationToken: TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -40,7 +40,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.True(response.Headers.Contains(Constants.DelayHeader));
             Assert.True(response.Headers.Contains(Constants.LimitHeader));
@@ -59,7 +59,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_AddedCorrectHeadersBeforeLimit()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -70,7 +70,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -82,7 +82,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.True(response.Headers.Contains(Constants.DelayHeader));
             Assert.True(response.Headers.Contains(Constants.LimitHeader));
@@ -101,7 +101,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_CalculateDelayReturnsZeroWhenTimeWindowIsZero()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -111,7 +111,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -123,7 +123,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.True(response.Headers.Contains(Constants.DelayHeader));
             Assert.Equal(0, int.Parse(response.Headers.GetValues(Constants.DelayHeader).First()));
@@ -137,7 +137,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_DelayNotAddedUnnecessarily()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -147,7 +147,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -160,7 +160,7 @@ public class SlowDownMiddlewareTests
             
             // Send the request.
             var timer = Stopwatch.StartNew();
-            _ = await client.SendAsync(message);
+            _ = await client.SendAsync(message, TestContext.Current.CancellationToken);
             timer.Stop();
             Assert.True(timer.ElapsedMilliseconds < 1000);
         }
@@ -173,7 +173,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_DelayWorks()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -184,7 +184,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -197,7 +197,7 @@ public class SlowDownMiddlewareTests
             
             // Send the request.
             var timer = Stopwatch.StartNew();
-            _ = await client.SendAsync(message);
+            _ = await client.SendAsync(message, TestContext.Current.CancellationToken);
             timer.Stop();
             Assert.True(timer.ElapsedMilliseconds > 1000);
         }
@@ -210,7 +210,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_ExcludesHeadersWhenDisabled()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -221,7 +221,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -233,7 +233,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.False(response.Headers.Contains(Constants.DelayHeader));
             Assert.False(response.Headers.Contains(Constants.LimitHeader));
@@ -248,7 +248,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_OnLimitReached_Works()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -262,7 +262,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -276,7 +276,7 @@ public class SlowDownMiddlewareTests
             Assert.False(flag);
             
             // Send the request.
-            _ = await client.SendAsync(message);
+            _ = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.True(flag);
         }
@@ -289,7 +289,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_ExpectedDelayIsCorrectlyCalculated()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -307,7 +307,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -319,7 +319,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.True(response.Headers.Contains(Constants.DelayHeader));
             Assert.True(response.Headers.Contains(Constants.LimitHeader));
@@ -338,7 +338,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_RemainingIsZeroWithNoWindow()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -352,7 +352,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -364,7 +364,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.False(response.Headers.Contains(Constants.DelayHeader));
             Assert.False(response.Headers.Contains(Constants.LimitHeader));
@@ -379,7 +379,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_SkipFailedRequests_Works()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -401,7 +401,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -414,7 +414,7 @@ public class SlowDownMiddlewareTests
             message.RequestUri = new Uri("/err", UriKind.Relative);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.True(response.Headers.Contains(Constants.DelayHeader));
             Assert.True(response.Headers.Contains(Constants.LimitHeader));
@@ -433,7 +433,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_SkipSuccessfulRequests_Works()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -445,7 +445,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -458,7 +458,7 @@ public class SlowDownMiddlewareTests
             message.RequestUri = new Uri("/", UriKind.Relative);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.True(response.Headers.Contains(Constants.DelayHeader));
             Assert.True(response.Headers.Contains(Constants.LimitHeader));
@@ -477,7 +477,7 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task HandleSlowDown_Skip_Works()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
@@ -489,7 +489,7 @@ public class SlowDownMiddlewareTests
             });
             
             // Start the test server.
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
             
             // Set a current count for the user.
@@ -501,7 +501,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
             // Send the request.
-            var response = await client.SendAsync(message);
+            var response = await client.SendAsync(message, TestContext.Current.CancellationToken);
 
             Assert.True(response.Headers.Contains(Constants.DelayHeader));
             Assert.True(response.Headers.Contains(Constants.LimitHeader));
@@ -520,13 +520,13 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task InvokeAsync_WorksDefault()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
         
         try
         {
             // Start the test server.
             var builder = UnitTestHelperMethods.CreateWebHostBuilder();
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
 
             // Create an HttpRequestMessage to send to the test server.
@@ -534,7 +534,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
             
             // Send the request.
-            _ = await client.SendAsync(message);
+            _ = await client.SendAsync(message, TestContext.Current.CancellationToken);
         }
         finally
         {
@@ -545,13 +545,13 @@ public class SlowDownMiddlewareTests
     [Fact]
     public async Task InvokeAsync_WorksWithSlowDownDisabled()
     {
-        await CacheSemaphore.Semaphore.WaitAsync();
+        await CacheSemaphore.Semaphore.WaitAsync(TestContext.Current.CancellationToken);
 
         try
         {
             // Start the test server.
             var builder = UnitTestHelperMethods.CreateWebHostBuilder(options => { options.SlowDownEnabled = false; });
-            var host = await builder.StartAsync();
+            var host = await builder.StartAsync(TestContext.Current.CancellationToken);
             var client = host.GetTestClient();
 
             // Create an HttpRequestMessage to send to the test server.
@@ -559,7 +559,7 @@ public class SlowDownMiddlewareTests
             var message = UnitTestHelperMethods.ConvertToHttpRequestMessage(context.Request);
 
             // Send the request.
-            _ = await client.SendAsync(message);
+            _ = await client.SendAsync(message, TestContext.Current.CancellationToken);
         }
         finally
         {

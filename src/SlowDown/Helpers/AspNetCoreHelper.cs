@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
 
-namespace Nearform.AspNetCore.SlowDown.Helpers;
+namespace Libexec.AspNetCore.SlowDown.Helpers;
 
 internal static class AspNetCoreHelper
 {
@@ -21,9 +21,8 @@ internal static class AspNetCoreHelper
         if (headers.TryGetValue("REMOTE_ADDR", out var remoteAddrHeader))
             return Task.FromResult(remoteAddrHeader.ToString());
 
-        if (!string.IsNullOrWhiteSpace(connection.RemoteIpAddress?.ToString()))
-            return Task.FromResult(connection.RemoteIpAddress!.ToString());
-
-        throw new HttpProtocolException(500, "unable to get client ip", null);
+        return !string.IsNullOrWhiteSpace(connection.RemoteIpAddress?.ToString())
+            ? Task.FromResult(connection.RemoteIpAddress!.ToString())
+            : throw new HttpProtocolException(500, "unable to get client ip", null);
     }
 }

@@ -1,4 +1,4 @@
-using Nearform.AspNetCore.SlowDown;
+using Libexec.AspNetCore.SlowDown;
 
 var builder = WebApplication.CreateBuilder(args);
 

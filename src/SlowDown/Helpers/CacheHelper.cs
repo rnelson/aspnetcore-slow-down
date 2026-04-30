@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Hybrid;
 
-namespace Nearform.AspNetCore.SlowDown.Helpers;
+namespace Libexec.AspNetCore.SlowDown.Helpers;
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "HeapView.ObjectAllocation")]
@@ -34,7 +34,7 @@ public class CacheHelper(SlowDownOptions options, HybridCache cache)
         var cacheOptions = new HybridCacheEntryOptions
         {
             Expiration = TimeSpan.FromMilliseconds(_options.TimeWindow),
-            LocalCacheExpiration = TimeSpan.FromMilliseconds(_options.TimeWindow),
+            LocalCacheExpiration = TimeSpan.FromMilliseconds(_options.TimeWindow)
             //Flags = HybridCacheEntryFlags.DisableLocalCache
         };
         
@@ -63,10 +63,10 @@ public class CacheHelper(SlowDownOptions options, HybridCache cache)
         _knownKeys.TryRemove(key, out _);
     }
 
-    public async Task RemoveAll(IEnumerable<string> tags, CancellationToken? cancellationToken = null)
+    public async Task RemoveAll( CancellationToken? cancellationToken = null)
     {
         var ct = cancellationToken ?? GetCancellationToken();
-        //await _cache.RemoveByTagAsync(tags, cancellationToken: ct);
+        
         foreach (var key in _knownKeys.Keys)
             await Remove(key, ct);
     }
@@ -93,7 +93,7 @@ public class CacheHelper(SlowDownOptions options, HybridCache cache)
         var cacheOptions = new HybridCacheEntryOptions
         {
             Expiration = TimeSpan.FromMilliseconds(_options.TimeWindow),
-            LocalCacheExpiration = TimeSpan.FromMilliseconds(_options.TimeWindow),
+            LocalCacheExpiration = TimeSpan.FromMilliseconds(_options.TimeWindow)
             //Flags = HybridCacheEntryFlags.DisableLocalCache
         };
 

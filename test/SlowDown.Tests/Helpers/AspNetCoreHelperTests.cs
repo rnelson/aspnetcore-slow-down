@@ -1,7 +1,7 @@
 ﻿using System.Net;
+using Libexec.AspNetCore.SlowDown;
+using Libexec.AspNetCore.SlowDown.Helpers;
 using Microsoft.AspNetCore.Http;
-using Nearform.AspNetCore.SlowDown;
-using Nearform.AspNetCore.SlowDown.Helpers;
 
 namespace SlowDown.Tests.Helpers;
 

@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Libexec.AspNetCore.SlowDown;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Nearform.AspNetCore.SlowDown;
 using Xunit.DependencyInjection;
 
 namespace SlowDown.Tests;

@@ -1,4 +1,4 @@
-﻿namespace Nearform.AspNetCore.SlowDown;
+﻿namespace Libexec.AspNetCore.SlowDown;
 
 internal static class Constants
 {

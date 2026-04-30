@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Libexec.AspNetCore.SlowDown.Helpers;
 using Microsoft.AspNetCore.Http;
-using Nearform.AspNetCore.SlowDown.Helpers;
 
-namespace Nearform.AspNetCore.SlowDown;
+namespace Libexec.AspNetCore.SlowDown;
 
 [SuppressMessage("ReSharper", "PropertyCanBeMadeInitOnly.Global")]
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]

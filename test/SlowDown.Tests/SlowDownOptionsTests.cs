@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using Libexec.AspNetCore.SlowDown;
 using Microsoft.AspNetCore.Http;
-using Nearform.AspNetCore.SlowDown;
 using Xunit.DependencyInjection;
 
 namespace SlowDown.Tests;
