@@ -14,7 +14,7 @@ public class SlowDownMiddlewareExtensionsTests
     [Fact]
     public async Task MiddlewareExtensions_Work()
     {
-        await Semaphore.WaitAsync();
+        await Semaphore.WaitAsync(TestContext.Current.CancellationToken);
 
         try
         {
@@ -36,7 +36,7 @@ public class SlowDownMiddlewareExtensionsTests
     [Fact]
     public async Task MiddlewareExtensions_Configuration_Works()
     {
-        await Semaphore.WaitAsync();
+        await Semaphore.WaitAsync(TestContext.Current.CancellationToken);
 
         var configBuilder = new ConfigurationBuilder();
         configBuilder.AddJsonFile("test.json");
